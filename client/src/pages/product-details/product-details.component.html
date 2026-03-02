@@ -1,0 +1,26 @@
+<div *ngIf="loading">Loading...</div>
+<div *ngIf="!loading && p" class="layout">
+  <div class="card" style="padding:16px">
+    <img [src]="p.image_url || 'https://via.placeholder.com/800x600?text=Product'" style="width:100%; border-radius:12px; background:#eef2f7"/>
+  </div>
+  <div>
+    <div class="card" style="padding:16px">
+      <h2 style="margin:0">{{p.name}}</h2>
+      <div class="muted" style="margin:4px 0">{{p.category}}</div>
+      <div style="font-size:1.6rem; font-weight:800; margin:8px 0">{{ toCurrency(p.price_cents) }}</div>
+      <div><span class="badge">Stock: {{p.stock}}</span></div>
+      <p style="margin-top:12px">{{p.description}}</p>
+      <button class="btn" (click)="add()" [disabled]="p.stock<=0">Add to Cart</button>
+    </div>
+    <div class="card" style="padding:16px; margin-top:16px">
+      <h3 style="margin-top:0">Specifications</h3>
+      <div class="specs" *ngIf="specEntries().length>0; else noSpecs">
+        <div class="row" *ngFor="let s of specEntries(); let last = last">
+          <div class="cell key">{{s[0]}}</div>
+          <div class="cell" [style.borderBottom]="last?'none':''">{{s[1]}}</div>
+        </div>
+      </div>
+      <ng-template #noSpecs><div class="muted">No specs available.</div></ng-template>
+    </div>
+  </div>
+</div>

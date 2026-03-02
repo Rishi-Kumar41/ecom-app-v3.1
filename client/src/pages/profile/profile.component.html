@@ -1,0 +1,36 @@
+<h2>My Profile</h2>
+<div class="card" *ngIf="user" style="padding:16px; max-width:520px">
+  <div>
+    <strong>Name:</strong> {{user.name}}
+  </div>
+  <div>
+    <strong>Email:</strong> {{user.email}}
+  </div>
+
+
+  <!-- Saved Address -->
+  <div class="card" style="padding:16px; max-width:720px; margin-top:12px">
+    <h3 style="margin-top:0">Saved shipping address</h3>
+
+    <div class="label">Address <span style="color:#ef4444">*</span></div>
+    <textarea class="input" rows="4" [(ngModel)]="address" placeholder="Flat / Door, Street, Area, City, State, PIN"></textarea>
+
+    <div class="label" style="margin-top:10px">Mobile (optional)</div>
+    <input class="input" type="tel" [(ngModel)]="phone" placeholder="+91-XXXXXXXXXX"/>
+
+    <div style="margin-top:12px; display:flex; gap:8px; align-items:center">
+      <button class="btn" (click)="saveAddress()" [disabled]="saving">Save</button>
+      <span *ngIf="ok" style="color:#16a34a; font-weight:600">{{ok}}</span>
+      <span *ngIf="err" style="color:#ef4444">{{err}}</span>
+    </div>
+
+    <p class="muted" style="margin-top:10px">
+      This saved address will be prefilled on the Checkout page. You can still edit it before placing an order.
+    </p>
+  </div>
+
+
+  <div style="margin-top:12px">
+    <a class="btn" routerLink="/orders">View Order History</a>
+  </div>
+</div>

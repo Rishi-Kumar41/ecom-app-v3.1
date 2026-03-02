@@ -1,0 +1,8 @@
+<h2>Payment</h2>
+<div class="card" style="padding:16px">
+  <p>Order #{{orderId}}</p>
+  <p>Status: {{status}}</p>
+  <button class="btn" (click)="payNow()" [disabled]="loading || status==='PAID'">Pay with Dummy Gateway</button>
+  <p style="margin-top:8px">{{message}}</p>
+  <button class="btn secondary" (click)="goOrders()">Go to My Orders</button>
+</div>

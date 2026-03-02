@@ -1,0 +1,55 @@
+<!-- client/src/pages/checkout/checkout.component.html -->
+<h2>Checkout</h2>
+
+<div class="card" *ngIf="items().length===0">
+  Your cart is empty.
+</div>
+
+<div *ngIf="items().length>0">
+  <div class="card" style="padding:16px; margin-bottom:12px">
+    <h3>Order Summary</h3>
+    <ul>
+      <li *ngFor="let it of items()">
+        {{it.product.name}} × {{it.quantity}} —
+        ₹{{((it.product.price_cents*it.quantity)/100).toFixed(2)}}
+      </li>
+    </ul>
+    <p><strong>Total: {{ total() }}</strong></p>
+  </div>
+
+  <div class="card" style="padding:16px; margin-bottom:12px">
+    <h3>Contact Info <span style="color:#ef4444">*</span></h3>
+
+    <div class="label">Full name <span style="color:#ef4444">*</span></div>
+    <input class="input" [(ngModel)]="contact_name" name="contact_name" required />
+
+    <div class="label" style="margin-top:8px">Email <span style="color:#ef4444">*</span></div>
+    <input class="input" [(ngModel)]="contact_email" name="contact_email" type="email" required />
+
+    <div class="label" style="margin-top:8px">Mobile <span style="color:#ef4444">*</span></div>
+    <input class="input" [(ngModel)]="contact_phone" name="contact_phone" type="tel" required />
+  </div>
+
+  <div class="card" style="padding:16px">
+    <h3>Shipping Address <span style="color:#ef4444">*</span></h3>
+    <textarea class="input"
+              rows="4"
+              [(ngModel)]="address"
+              name="address"
+              placeholder="Flat / Door, Street, Area, City, State, PIN"
+              required></textarea>
+
+    <p *ngIf="error" style="color:#ef4444; margin-top:8px">{{error}}</p>
+
+    <button class="btn"
+            (click)="placeOrder()"
+            [disabled]="loading
+              || !contact_name?.trim()
+              || !contact_email?.trim()
+              || !contact_phone?.trim()
+              || !address?.trim()"
+            style="margin-top:12px">
+      Place Order
+    </button>
+  </div>
+</div>

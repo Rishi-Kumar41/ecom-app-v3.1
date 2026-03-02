@@ -1,0 +1,47 @@
+<!-- client/src/pages/orders/orders.component.html -->
+<h2>My Orders</h2>
+
+<div *ngIf="loading">Loading...</div>
+<div *ngIf="error" style="color:red">{{error}}</div>
+<div *ngIf="!loading && orders.length===0" class="card" style="padding:12px">No orders yet.</div>
+
+<div *ngFor="let o of orders" class="card" style="padding:12px; margin-bottom:12px">
+  <!-- Header row: ID, Copy button, Status -->
+  <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap">
+    <strong>Order #{{o.id}}</strong>
+
+    <button class="btn secondary"
+            (click)="copy(o.id)"
+            style="padding:4px 8px; font-size:.85rem">
+      Copy ID
+    </button>
+    <span *ngIf="copiedOrderId === o.id" class="muted">Copied!</span>
+
+    <span [ngClass]="statusClass(o.status)" style="margin-left:auto">{{ o.status }}</span>
+  </div>
+
+  <!-- Totals and summary -->
+  <div style="margin-top:6px">
+    <strong>Total:</strong> {{ total(o) }}
+  </div>
+
+  <div class="muted" style="margin-top:6px">
+    <strong>Ship to:</strong> {{ shortAddress(o) }}
+  </div>
+  <div class="muted">
+    <strong>Contact:</strong> {{ o.contact_name }} | {{ o.contact_phone }}
+  </div>
+
+  <!-- Items -->
+  <ul style="margin-top:8px">
+    <li *ngFor="let it of o.items">
+      Product #{{it.product_id}} × {{it.quantity}} — ₹{{ (it.unit_price_cents/100).toFixed(2) }} each
+    </li>
+  </ul>
+
+  <!-- Actions -->
+  <div style="display:flex; gap:8px; margin-top:8px">
+    <a class="btn" [routerLink]="['/order', o.id]">View</a>
+    <button class="btn" (click)="cancel(o)" [disabled]="o.status === 'CANCELLED'">Cancel Order</button>
+  </div>
+</div>

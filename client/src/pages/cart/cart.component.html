@@ -1,0 +1,21 @@
+<h2>Your Cart</h2>
+<div class="card" *ngIf="items().length===0">Your cart is empty. <a class="link" routerLink="/">Browse products</a></div>
+<div *ngFor="let it of items()" class="card" style="margin-bottom:12px; padding:12px">
+  <div style="display:flex; gap:12px; align-items:center;">
+    <img [src]="it.product.image_url || 'https://via.placeholder.com/80'" width="96" height="72" style="border-radius:12px"/>
+    <div style="flex:1">
+      <div><strong>{{it.product.name}}</strong></div>
+      <div class="muted">₹{{(it.product.price_cents/100).toFixed(2)}}</div>
+      <div style="margin-top:6px">Qty:
+        <button class="btn" style="padding:4px 10px" (click)="dec(it.product.id)">-</button>
+        <span style="padding:0 8px">{{it.quantity}}</span>
+        <button class="btn" style="padding:4px 10px" (click)="inc(it.product.id)">+</button>
+      </div>
+    </div>
+    <button class="btn" (click)="remove(it.product.id)">Remove</button>
+  </div>
+</div>
+<div *ngIf="items().length>0" class="card" style="margin-top:16px; padding:16px">
+  <h3>Total: {{ total() }}</h3>
+  <button class="btn" (click)="checkout()">Proceed to Checkout</button>
+</div>

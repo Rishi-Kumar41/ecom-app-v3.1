@@ -1,0 +1,39 @@
+<h2>Electronics</h2>
+<div class="card" style="padding:12px; margin-bottom:12px">
+  <div class="filters">
+    <input class="input" placeholder="Search products..." [(ngModel)]="q" (keyup.enter)="fetch()"/>
+    <select class="input" [(ngModel)]="category" (change)="fetch()">
+      <option value="">All Categories</option>
+      <option *ngFor="let c of categories" [value]="c">{{c}}</option>
+    </select>
+    <input class="input" type="number" min="0" placeholder="Min price (₹ cents)" [(ngModel)]="min_price_cents" (change)="fetch()"/>
+    <input class="input" type="number" min="0" placeholder="Max price (₹ cents)" [(ngModel)]="max_price_cents" (change)="fetch()"/>
+    <select class="input" [(ngModel)]="in_stock" (change)="fetch()">
+      <option [ngValue]="null">Stock (All)</option>
+      <option [ngValue]="true">In stock</option>
+      <option [ngValue]="false">Out of stock</option>
+    </select>
+  </div>
+  <div style="display:flex; gap:10px; align-items:center">
+    <div class="label">Sort</div>
+    <select class="input" style="max-width:220px" [(ngModel)]="sort" (change)="fetch()">
+      <option value="price_asc">Price ↑</option>
+      <option value="price_desc">Price ↓</option>
+      <option value="name_asc">Name A→Z</option>
+      <option value="name_desc">Name Z→A</option>
+    </select>
+    <button class="btn" style="margin-left:auto" (click)="fetch()">Apply</button>
+  </div>
+</div>
+
+<div *ngIf="loading">Loading...</div>
+<div class="grid" *ngIf="!loading">
+  <a class="card" *ngFor="let p of products" [routerLink]="['/product', p.id]" style="text-decoration:none; color:inherit">
+    <img class="product-img" [src]="p.image_url || 'https://via.placeholder.com/400x300?text=Product'"/>
+    <div class="title">{{p.name}}</div>
+    <div class="muted">{{p.category}}</div>
+    <div class="price">{{ toCurrency(p.price_cents) }}</div>
+    <div><span class="badge">Stock: {{p.stock}}</span></div>
+    <button class="btn" (click)="$event.preventDefault(); add(p)" [disabled]="p.stock<=0" style="margin-top:8px">Add to Cart</button>
+  </a>
+</div>

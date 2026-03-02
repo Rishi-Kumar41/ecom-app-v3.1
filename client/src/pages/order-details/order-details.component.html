@@ -1,0 +1,66 @@
+<!-- client/src/pages/order-details/order-details.component.html -->
+<h2>Order Details</h2>
+
+<div *ngIf="loading">Loading...</div>
+<div *ngIf="error" style="color:red">{{error}}</div>
+
+<div *ngIf="!loading && order" class="card" style="padding:16px">
+  <!-- Header -->
+  <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap">
+    <strong style="font-size:1.1rem">Order #{{order.id}}</strong>
+
+    <button class="btn secondary"
+            (click)="copy(order.id)"
+            style="padding:4px 8px; font-size:.85rem">
+      Copy ID
+    </button>
+    <span *ngIf="copied" class="muted">Copied!</span>
+
+    <span [ngClass]="statusClass(order.status)" style="margin-left:auto">{{ order.status }}</span>
+  </div>
+
+  <!-- Summary -->
+  <div style="margin-top:8px; display:grid; gap:12px">
+    <div><strong>Total:</strong> {{ total(order) }}</div>
+
+    <div class="card" style="padding:12px">
+      <h3 style="margin:0 0 6px 0">Ship to</h3>
+      <div class="muted">{{ order.shipping_address || '—' }}</div>
+    </div>
+
+    <div class="card" style="padding:12px">
+      <h3 style="margin:0 0 6px 0">Contact</h3>
+      <div class="muted">
+        <div><strong>Name:</strong> {{ order.contact_name || '—' }}</div>
+        <div><strong>Email:</strong> {{ order.contact_email || '—' }}</div>
+        <div><strong>Mobile:</strong> {{ order.contact_phone || '—' }}</div>
+      </div>
+    </div>
+
+    <div class="card" style="padding:12px">
+      <h3 style="margin:0 0 6px 0">Items</h3>
+      <ul style="margin:0">
+        <li *ngFor="let it of order.items">
+          Product #{{it.product_id}} × {{it.quantity}}
+          — ₹{{ (it.unit_price_cents/100).toFixed(2) }} each
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Simple tracking (same as before) -->
+  <div class="card" style="padding:12px; margin-top:12px">
+    <h3 style="margin:0 0 6px 0">Tracking</h3>
+    <ol style="margin:0">
+      <li>Order created</li>
+      <li *ngIf="order.status==='PENDING_PAYMENT'">Awaiting payment</li>
+      <li *ngIf="order.status!=='PENDING_PAYMENT'">Payment received</li>
+      <li *ngIf="order.status==='CANCELLED'">Order cancelled</li>
+      <li *ngIf="order.status==='PAID'">Processing for shipment (demo)</li>
+    </ol>
+  </div>
+
+  <div style="margin-top:12px">
+    <a class="btn" routerLink="/orders">Back to Orders</a>
+  </div>
+</div>
