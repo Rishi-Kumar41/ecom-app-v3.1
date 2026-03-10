@@ -183,7 +183,7 @@ Badge colors are in src/styles.css:
 
 # 0) Products
 curl -s http://127.0.0.1:8000/products | head
-
+token
 # 1) Register (adjust email as needed)
 curl -s -X POST http://127.0.0.1:8000/auth/register \
   -H "Content-Type: application/json" \

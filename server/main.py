@@ -1,18 +1,21 @@
-from fastapi import FastAPI, Depends, HTTPException, status, Query
+from fastapi import FastAPI, Depends, HTTPException, Request, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, asc, desc
 from typing import List, Optional
 import json
+import uuid
+import stripe
+
+
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+stripe_webhook_secret=os.getenv("STRIPE_WEBHOOK_SECRET")
 
 from database import Base, engine, get_db
-from models import User, Product, Order, OrderItem, OrderStatus
-from schemas import (
-    UserCreate, UserOut, TokenOut,
-    ProductOut, OrderCreate, OrderOut, OrderItemOut,
-    AddressUpdate
-)
+from models import User, Product, Order, OrderItem, OrderStatus, Payment, CartItem
+from schemas import UserCreate, UserOut, TokenOut, ProductOut, OrderCreate, OrderOut
 from auth import hash_password, verify_password, create_access_token, get_current_user
 from seed import seed_products
 
@@ -22,11 +25,7 @@ app = FastAPI(title="Ecom API", version="3.1")
 
 app.add_middleware(
     CORSMiddleware,
-    
-allow_origins=[
-        "http://localhost:4200",
-        "http://127.0.0.1:4200",
-    ],
+    allow_origins=["http://localhost:4200", "http://127.0.0.1:4200"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -37,7 +36,7 @@ def on_startup():
     db = next(get_db())
     seed_products(db)
 
-# ---- AUTH ----
+    # ---------------- AUTH ----------------
 @app.post("/auth/register", response_model=UserOut)
 def register(user: UserCreate, db: Session = Depends(get_db)):
     exists = db.query(User).filter(User.email == user.email).first()
@@ -61,38 +60,31 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 def me(current_user: User = Depends(get_current_user)):
     return current_user
 
-# ---- PRODUCTS ----
-
+# ---------------- PRODUCTS ----------------
 def product_to_out(p: Product) -> ProductOut:
     specs = None
     if p.specs_json:
         try:
             specs = json.loads(p.specs_json)
-        except Exception:
+        except:
             specs = None
     return ProductOut(
-        id=p.id,
-        name=p.name,
-        description=p.description,
-        category=p.category,
-        price_cents=p.price_cents,
-        image_url=p.image_url,
-        stock=p.stock,
-        specs=specs,
+        id=p.id, name=p.name, description=p.description,
+        category=p.category, price_cents=p.price_cents,
+        image_url=p.image_url, stock=p.stock, specs=specs
     )
 
 @app.get("/products", response_model=List[ProductOut])
 def list_products(
-    q: Optional[str] = Query(default=None),
-    category: Optional[str] = Query(default=None),
-    min_price_cents: Optional[int] = Query(default=None, ge=0),
-    max_price_cents: Optional[int] = Query(default=None, ge=0),
-    in_stock: Optional[bool] = Query(default=None),
-    sort: Optional[str] = Query(default=None),
+    q: Optional[str] = Query(None),
+    category: Optional[str] = Query(None),
+    min_price_cents: Optional[int] = Query(None, ge=0),
+    max_price_cents: Optional[int] = Query(None, ge=0),
+    in_stock: Optional[bool] = Query(None),
+    sort: Optional[str] = Query(None),
     db: Session = Depends(get_db)
 ):
     query = db.query(Product)
-
     if q:
         like = f"%{q}%"
         query = query.filter(or_(Product.name.ilike(like), Product.description.ilike(like)))
@@ -103,27 +95,17 @@ def list_products(
     if max_price_cents is not None:
         query = query.filter(Product.price_cents <= max_price_cents)
     if in_stock is not None:
-        if in_stock:
-            query = query.filter(Product.stock > 0)
-        else:
-            query = query.filter(Product.stock <= 0)
-
-    if sort == 'price_asc':
+        query = query.filter(Product.stock > 0 if in_stock else Product.stock <= 0)
+    if sort == "price_asc":
         query = query.order_by(asc(Product.price_cents))
-    elif sort == 'price_desc':
+    elif sort == "price_desc":
         query = query.order_by(desc(Product.price_cents))
-    elif sort == 'name_asc':
+    elif sort == "name_asc":
         query = query.order_by(asc(Product.name))
-    elif sort == 'name_desc':
+    elif sort == "name_desc":
         query = query.order_by(desc(Product.name))
-
     products = query.all()
     return [product_to_out(p) for p in products]
-
-@app.get("/products/categories", response_model=List[str])
-def list_categories(db: Session = Depends(get_db)):
-    rows = db.query(Product.category).distinct().all()
-    return sorted([r[0] for r in rows if r[0]])
 
 @app.get("/products/{product_id}", response_model=ProductOut)
 def get_product(product_id: int, db: Session = Depends(get_db)):
@@ -132,58 +114,25 @@ def get_product(product_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Product not found")
     return product_to_out(p)
 
-# ---- ORDERS ----
-@app.get("/orders", response_model=List[OrderOut])
-def list_orders(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    orders = db.query(Order).filter(Order.user_id == current_user.id).order_by(Order.id.desc()).all()
-    out = []
-    for o in orders:
-        out.append(OrderOut(
-            id=o.id,
-            status=o.status,
-            total_amount_cents=o.total_amount_cents,
-            payment_method=o.payment_method,
-            shipping_address=o.shipping_address,
-            contact_name=o.contact_name,
-            contact_email=o.contact_email,
-            contact_phone=o.contact_phone,
-            items=[OrderItemOut(product_id=it.product_id, quantity=it.quantity, unit_price_cents=it.unit_price_cents) for it in o.items]
-        ))
-    return out
-
-@app.get("/orders/{order_id}", response_model=OrderOut)
-def get_order(order_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    o = db.query(Order).filter(Order.id == order_id, Order.user_id == current_user.id).first()
-    if not o:
-        raise HTTPException(status_code=404, detail="Order not found")
-    return OrderOut(
-        id=o.id,
-        status=o.status,
-        total_amount_cents=o.total_amount_cents,
-        payment_method=o.payment_method,
-        shipping_address=o.shipping_address,
-        contact_name=o.contact_name,
-        contact_email=o.contact_email,
-        contact_phone=o.contact_phone,
-        items=[OrderItemOut(product_id=it.product_id, quantity=it.quantity, unit_price_cents=it.unit_price_cents) for it in o.items]
-    )
-
+# ---------------- ORDERS ----------------
 @app.post("/orders", response_model=OrderOut, status_code=201)
 def create_order(payload: OrderCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     if not payload.items:
         raise HTTPException(status_code=400, detail="No items in order")
 
-    total = 0
-    items: list[OrderItem] = []
+    total, items = 0, []
+
+    # Validate products and calculate total
     for it in payload.items:
         prod = db.query(Product).filter(Product.id == it.product_id).first()
         if not prod:
             raise HTTPException(status_code=404, detail=f"Product {it.product_id} not found")
         if prod.stock < it.quantity:
-            raise HTTPException(status_code=400, detail=f"Insufficient stock for {prod.name}")
+            raise HTTPException(status_code=400, detail="Insufficient stock")
         total += prod.price_cents * it.quantity
         items.append(OrderItem(product_id=prod.id, quantity=it.quantity, unit_price_cents=prod.price_cents))
 
+    # Create the order
     order = Order(
         user_id=current_user.id,
         status=OrderStatus.PENDING_PAYMENT,
@@ -192,11 +141,12 @@ def create_order(payload: OrderCreate, current_user: User = Depends(get_current_
         shipping_address=payload.shipping_address,
         contact_name=payload.contact_name,
         contact_email=payload.contact_email,
-        contact_phone=payload.contact_phone,
+        contact_phone=payload.contact_phone
     )
     db.add(order)
-    db.flush()
+    db.flush()  # ensures order.id exists before adding items
 
+    # Add order items
     for it in items:
         it.order_id = order.id
         db.add(it)
@@ -204,70 +154,138 @@ def create_order(payload: OrderCreate, current_user: User = Depends(get_current_
     db.commit()
     db.refresh(order)
 
-    return OrderOut(
-        id=order.id,
-        status=order.status,
-        total_amount_cents=order.total_amount_cents,
-        payment_method=order.payment_method,
-        shipping_address=order.shipping_address,
-        contact_name=order.contact_name,
-        contact_email=order.contact_email,
-        contact_phone=order.contact_phone,
-        items=[OrderItemOut(product_id=it.product_id, quantity=it.quantity, unit_price_cents=it.unit_price_cents) for it in order.items]
-    )
+    return order
 
-@app.post("/orders/{order_id}/cancel", response_model=OrderOut)
-def cancel_order(order_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    o = db.query(Order).filter(Order.id == order_id, Order.user_id == current_user.id).first()
-    if not o:
+# ---------------- PAYMENTS (Stripe) ----------------
+@app.post("/payments/stripe-session/{order_id}")
+def create_stripe_session(order_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    # Fetch the order
+    order = db.query(Order).filter(Order.id == order_id, Order.user_id == current_user.id).first()
+    if not order:
         raise HTTPException(status_code=404, detail="Order not found")
-    if o.status == OrderStatus.CANCELLED:
-        raise HTTPException(status_code=400, detail="Order already cancelled")
 
-    o.status = OrderStatus.CANCELLED
-    db.commit(); db.refresh(o)
-    return OrderOut(
-        id=o.id, status=o.status, total_amount_cents=o.total_amount_cents,
-        payment_method=o.payment_method, shipping_address=o.shipping_address,
-        contact_name=o.contact_name, contact_email=o.contact_email, contact_phone=o.contact_phone,
-        items=[OrderItemOut(product_id=it.product_id, quantity=it.quantity, unit_price_cents=it.unit_price_cents) for it in o.items]
+    # Stripe minimum amount check (50 cents USD ~ 50 INR in test mode)
+    MIN_AMOUNT_CENTS = 5000  # 50 INR in paise
+    if order.total_amount_cents < MIN_AMOUNT_CENTS:
+        print(f"Warning: Order total {order.total_amount_cents} paise is below Stripe minimum. Adjusting to {MIN_AMOUNT_CENTS}.")
+        stripe_amount = MIN_AMOUNT_CENTS
+    else:
+        stripe_amount = order.total_amount_cents
+
+    # Create Stripe Checkout session
+    session = stripe.checkout.Session.create(
+        payment_method_types=['card'],
+        line_items=[{
+            'price_data': {
+                'currency': 'inr',
+                'product_data': {'name': f'Order #{order.id}'},
+                'unit_amount': stripe_amount
+            },
+            'quantity': 1,
+        }],
+        mode='payment',
+        success_url=f"http://localhost:4200/payment-success?order_id={order.id}",
+        cancel_url=f"http://localhost:4200/payment-failed?order_id={order.id}",
+        metadata={'order_id': str(order.id)}
     )
 
-@app.post("/payments/{order_id}/pay", response_model=OrderOut)
-def dummy_pay(order_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    o = db.query(Order).filter(Order.id == order_id, Order.user_id == current_user.id).first()
-    if not o:
-        raise HTTPException(status_code=404, detail="Order not found")
-    if o.status == OrderStatus.CANCELLED:
-        raise HTTPException(status_code=400, detail="Cannot pay a cancelled order")
-
-    if o.status != OrderStatus.PAID:
-        for it in o.items:
-            prod = db.query(Product).filter(Product.id == it.product_id).first()
-            if prod and prod.stock >= it.quantity:
-                prod.stock -= it.quantity
-            else:
-                raise HTTPException(status_code=400, detail=f"Insufficient stock during payment for product {it.product_id}")
-        o.status = OrderStatus.PAID
-        db.commit(); db.refresh(o)
-
-    return OrderOut(
-        id=o.id, status=o.status, total_amount_cents=o.total_amount_cents,
-        payment_method=o.payment_method, shipping_address=o.shipping_address,
-        contact_name=o.contact_name, contact_email=o.contact_email, contact_phone=o.contact_phone,
-        items=[OrderItemOut(product_id=it.product_id, quantity=it.quantity, unit_price_cents=it.unit_price_cents) for it in o.items]
+    # Create payment record in DB (initially pending)
+    payment = Payment(
+        order_id=order.id,
+        amount_cents=stripe_amount,
+        status="pending",
+        gateway_ref=session.id
     )
-
-#(new endpoint)
-@app.put("/me/address", response_model=UserOut)
-def save_address(
-    payload: AddressUpdate,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-    ):
-    current_user.default_shipping_address = payload.default_shipping_address
-    current_user.default_contact_phone = payload.default_contact_phone
+    db.add(payment)
     db.commit()
-    db.refresh(current_user)
-    return current_user
+    db.refresh(payment)
 
+    return {"checkout_url": session.url} 
+     
+@app.post("/payments/stripe-webhook")
+async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
+    payload = await request.body()
+    sig_header = request.headers.get("stripe-signature")
+
+    try:
+        event = stripe.Webhook.construct_event(payload, sig_header, stripe_webhook_secret)
+    except Exception as e:
+        print("Webhook error:", e)
+        return JSONResponse(status_code=400, content={"detail": "Invalid payload/signature"})
+
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+        print("Webhook session object:", session)
+
+        order_id_str = session.get('metadata', {}).get('order_id')
+        if not order_id_str:
+            print("Webhook missing order_id")
+            return JSONResponse(status_code=400, content={"detail": "Missing order_id"})
+
+        order = db.query(Order).filter(Order.id == int(order_id_str)).first()
+        if not order:
+            print(f"Order {order_id_str} not found")
+            return JSONResponse(status_code=404, content={"detail": "Order not found"})
+
+        # Update payment record
+        payment = db.query(Payment).filter(Payment.order_id == order.id).first()
+        if payment:
+            payment.status = "success"
+        else:
+            payment = Payment(
+                order_id=order.id,
+                amount_cents=order.total_amount_cents,
+                status="success",
+                gateway_ref=session.get("id")
+            )
+            db.add(payment)
+
+        # Mark order as paid
+        if order.status != OrderStatus.PAID:
+            order.status = OrderStatus.PAID
+
+            # Reduce stock
+            for item in order.items:
+                product = db.query(Product).filter(Product.id == item.product_id).first()
+                if product:
+                    product.stock = max(product.stock - item.quantity, 0)
+
+            # Clear cart
+            db.query(CartItem).filter(CartItem.user_id == order.user_id).delete()
+
+        db.commit()
+        print(f"Order {order.id} marked as PAID, payment updated.")
+
+    return {"status": "success"}
+
+    # List all orders for the current user
+@app.get("/orders", response_model=List[OrderOut])
+def list_orders(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    orders = db.query(Order).filter(Order.user_id == current_user.id).all()
+    return orders
+    
+# Get single order by ID
+@app.get("/orders/{order_id}", response_model=OrderOut)
+def get_order(order_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    order = db.query(Order).filter(Order.id == order_id, Order.user_id == current_user.id).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    return order
+
+@app.post("/orders/{order_id}/cancel")
+def cancel_order(order_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    # Find the order for this user
+    order = db.query(Order).filter(Order.id == order_id, Order.user_id == current_user.id).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    # Only allow cancellation if not paid yet
+    if order.status != OrderStatus.PENDING_PAYMENT:
+        raise HTTPException(status_code=400, detail="Order cannot be cancelled at this stage")
+
+    order.status = OrderStatus.CANCELLED
+    db.commit()
+    db.refresh(order)
+
+    # Return a proper JSON response
+    return {"status": "success", "message": f"Order {order.id} cancelled"}

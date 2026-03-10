@@ -71,3 +71,7 @@ class OrderOut(BaseModel):
     items: List[OrderItemOut]
     class Config:
         from_attributes = True
+        
+class PaymentSessionOut(BaseModel):
+    payment_url: str
+

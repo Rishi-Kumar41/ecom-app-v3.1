@@ -7,6 +7,7 @@ import { CartService } from './services/cart.service';
 @Component({ selector: 'app-root', standalone: true, imports: [CommonModule, RouterOutlet, RouterLink], template: `
   <nav class="nav">
     <a routerLink="/">Products</a>
+    <a routerLink="/agent">Agent</a>
     <a routerLink="/cart">Cart ({{ cart.count() }})</a>
     <a routerLink="/orders" *ngIf="auth.isLoggedIn()">Orders</a>
     <a routerLink="/profile" *ngIf="auth.isLoggedIn()">Profile</a>

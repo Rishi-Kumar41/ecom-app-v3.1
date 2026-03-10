@@ -1,0 +1,11 @@
+<div class="wrap">
+  <h2>AI Purchase Agent</h2>
+  <div>
+    <label>Product name</label>
+    <input [(ngModel)]="product" placeholder="e.g. wireless headphones" />
+  </div>
+  <div style="margin-top:12px">
+    <button (click)="buy()" [disabled]="loading">Buy with Agent</button>
+  </div>
+  <div style="margin-top:12px;color:var(--muted)">{{ status }}</div>
+</div>

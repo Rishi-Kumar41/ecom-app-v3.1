@@ -1,0 +1,11 @@
+# Python virtual environment
+server/.venv/
+
+# Node modules
+client/node_modules/
+
+# Angular build/cache
+client/.angular/cache/
+
+# OS files
+.DS_Store

@@ -11,6 +11,7 @@ import { OrderDetailsComponent } from './pages/order-details/order-details.compo
 import { ProfileComponent } from './pages/profile/profile.component';
 import { LoginComponent } from './pages/login/login.component';
 import { RegisterComponent } from './pages/register/register.component';
+import { AiAgentComponent } from './pages/ai-agent/ai-agent.component';
 
 export const routes: Routes = [
   { path: '', component: ProductsComponent },
@@ -23,5 +24,6 @@ export const routes: Routes = [
   { path: 'payment/:orderId', component: PaymentComponent, canActivate: [canActivateAuth] },
   { path: 'order/:orderId', component: OrderDetailsComponent, canActivate: [canActivateAuth] },
   { path: 'orders', component: OrdersComponent, canActivate: [canActivateAuth] },
+  { path: 'agent', component: AiAgentComponent },
   { path: '**', redirectTo: '' }
 ];
