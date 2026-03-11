@@ -7,5 +7,8 @@ client/node_modules/
 # Angular build/cache
 client/.angular/cache/
 
+# Environment files
+server/.env
+
 # OS files
 .DS_Store
