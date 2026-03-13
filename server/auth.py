@@ -13,7 +13,12 @@ JWT_SECRET = "dev-secret-please-change"
 JWT_ALGO = "HS256"
 ACCESS_TOKEN_EXPIRES_MIN = 60 * 24
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+pwd_context = CryptContext(
+    schemes=["bcrypt_sha256", "bcrypt"],
+    deprecated="auto"
+)
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 def hash_password(password: str) -> str:
