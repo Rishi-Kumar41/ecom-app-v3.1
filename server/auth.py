@@ -1,3 +1,4 @@
+# server/auth.py
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 from fastapi import Depends, HTTPException, status
@@ -13,12 +14,7 @@ JWT_SECRET = "dev-secret-please-change"
 JWT_ALGO = "HS256"
 ACCESS_TOKEN_EXPIRES_MIN = 60 * 24
 
-
-pwd_context = CryptContext(
-    schemes=["bcrypt_sha256", "bcrypt"],
-    deprecated="auto"
-)
-
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 def hash_password(password: str) -> str:
@@ -27,10 +23,17 @@ def hash_password(password: str) -> str:
 def verify_password(plain: str, hashed: str) -> bool:
     return pwd_context.verify(plain, hashed)
 
-def create_access_token(data: dict, expires_minutes: int = ACCESS_TOKEN_EXPIRES_MIN) -> str:
-    to_encode = data.copy()
+def create_access_token(user: User, expires_minutes: int = ACCESS_TOKEN_EXPIRES_MIN) -> str:
+    to_encode = {
+        "sub": str(user.id),
+        "role": user.role,
+        "name": user.name,
+        "email": user.email
+    }
+
     expire = datetime.now(tz=timezone.utc) + timedelta(minutes=expires_minutes)
     to_encode.update({"exp": expire})
+
     return jwt.encode(to_encode, JWT_SECRET, algorithm=JWT_ALGO)
 
 def decode_token(token: str) -> Optional[dict]:
@@ -41,9 +44,13 @@ def decode_token(token: str) -> Optional[dict]:
 
 def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)) -> User:
     payload = decode_token(token)
+
     if not payload or "sub" not in payload:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
-    user = db.query(User).filter(User.id == int(payload["sub"])) .first()
+
+    user = db.query(User).filter(User.id == int(payload["sub"])).first()
+
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
-    return user
+
+    return user  

@@ -10,10 +10,14 @@ import json
 import uuid
 import stripe
 import os
+from dotenv import load_dotenv
 
+load_dotenv()
+
+import stripe
 
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
-stripe_webhook_secret=os.getenv("STRIPE_WEBHOOK_SECRET")
+stripe_webhook_secret = os.getenv("STRIPE_WEBHOOK_SECRET")
 
 from database import Base, engine, get_db
 from models import User, Product, Order, OrderItem, OrderStatus, Payment, CartItem, UserRole
@@ -59,14 +63,14 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     db.refresh(u)
     return u
 
+# login route
 @app.post("/auth/login", response_model=TokenOut)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == form_data.username).first()
     if not user or not verify_password(form_data.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    role_value = getattr(user.role, "value", user.role)  # supports Enum or plain string
-    token = create_access_token({"sub": str(user.id), "role": role_value})
-    return {"access_token": token, "token_type": "bearer"}
+    
+    token = create_access_token(user) 
 
 @app.get("/me", response_model=UserOut)
 def me(current_user: User = Depends(get_current_user)):
@@ -146,7 +150,7 @@ def create_order(payload: OrderCreate, current_user: User = Depends(get_current_
 
     # Create the order
     order = Order(
-        user_id=current_user.id,
+        user_id=current_user.id,      
         status=OrderStatus.PENDING_PAYMENT,
         total_amount_cents=total,
         payment_method=payload.payment_method,
