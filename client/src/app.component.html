@@ -1,0 +1,26 @@
+<nav class="nav">
+  <!-- USER VIEW -->
+  <ng-container *ngIf="auth.userRole() === 'user'; else adminOnly">
+    <a routerLink="/">Products</a>
+    <a routerLink="/agent">Agent</a>
+    <a routerLink="/cart">Cart ({{ cart.count() }})</a>
+    <a routerLink="/orders" *ngIf="auth.isLoggedIn()">Orders</a>
+    <a routerLink="/profile" *ngIf="auth.isLoggedIn()">Profile</a>
+    <span class="spacer"></span>
+    <span *ngIf="auth.isLoggedIn()">Hi, {{ auth.userName() }}</span>
+    <a routerLink="/login" *ngIf="!auth.isLoggedIn()">Login</a>
+    <a routerLink="/register" *ngIf="!auth.isLoggedIn()">Register</a>
+    <a routerLink="/logout" *ngIf="auth.isLoggedIn()">Logout</a>
+  </ng-container>
+
+  <!-- ADMIN VIEW -->
+  <ng-template #adminOnly>
+    <a routerLink="/support">Support</a>
+    <span class="spacer"></span>
+    <span *ngIf="auth.isLoggedIn()">Hi, {{ auth.userName() }}</span>
+    <a routerLink="/login" *ngIf="!auth.isLoggedIn()">Login</a>
+    <a routerLink="/register" *ngIf="!auth.isLoggedIn()">Register</a>
+    <a routerLink="/logout" *ngIf="auth.isLoggedIn()">Logout</a>
+  </ng-template>
+</nav>
+<main class="container"><router-outlet></router-outlet></main>

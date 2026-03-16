@@ -26,6 +26,7 @@ export class LoginComponent {
   password = "";
   error = "";
   loading = false;
+  mode: "user" | "admin" = "user";
   constructor(
     private auth: AuthService,
     private router: Router,
@@ -34,12 +35,45 @@ export class LoginComponent {
   submit() {
     this.error = "";
     this.loading = true;
+
+    // Login → save token → fetch /me
     this.auth.login(this.email, this.password).subscribe({
       next: (res) => {
         this.auth.saveToken(res.access_token);
-        this.auth.fetchMe().subscribe((u) => {
-          this.auth.setUser(u);
-          this.router.navigateByUrl("/");
+
+        this.auth.fetchMe().subscribe({
+          next: (u) => {
+            this.auth.setUser(u);
+
+            // If user selected "Login as Admin" but doesn't have admin role → block login
+            if (this.mode === "admin" && u.role !== "admin") {
+              try {
+                localStorage.removeItem("ecom_token");
+                localStorage.removeItem("ecom_user");
+                localStorage.removeItem("ecom_cart");
+              } catch {}
+              this.loading = false;
+              this.error = "This account does not have admin access.";
+              return;
+            }
+
+            // Route by actual role
+            const returnUrl =
+              this.route.snapshot.queryParamMap.get("returnUrl") || "/";
+            if (u.role === "admin") {
+              this.router.navigateByUrl("/support");
+            } else {
+              this.router.navigateByUrl(returnUrl);
+            }
+          },
+          error: () => {
+            try {
+              localStorage.removeItem("ecom_token");
+              localStorage.removeItem("ecom_user");
+            } catch {}
+            this.loading = false;
+            this.error = "Unable to load account. Please try again.";
+          },
         });
       },
       error: (err) => {
@@ -47,7 +81,9 @@ export class LoginComponent {
         this.loading = false;
       },
     });
-    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/';
-    this.router.navigateByUrl(returnUrl);
+  }
+  setMode(m: "user" | "admin") {
+    this.mode = m;
+    this.error = "";
   }
 }

@@ -1,0 +1,29 @@
+<!-- client/src/pages/support/support-layout.component.html -->
+<div class="card support-card">
+  <h2 class="title">Support</h2>
+
+  <!-- Search (placeholder for now) -->
+  <label class="label" for="q">Search</label>
+  <div class="row">
+    <input
+      id="q"
+      class="input"
+      [(ngModel)]="q"
+      placeholder="Search (orders, users, products...)"
+    />
+    <button class="btn" (click)="goToSearch()">Search</button>
+  </div>
+
+  <!-- Add product (placeholder route for now) -->
+  <div class="actions">
+    <button class="btn" (click)="goToAdd()">Add product</button>
+  </div>
+</div>
+
+<!-- Workspace placeholder -->
+<div class="card">
+  <h3 class="subtitle">Workspace</h3>
+  <p class="muted">
+    This area will show search results or admin tools. Coming soon.
+  </p>
+</div>

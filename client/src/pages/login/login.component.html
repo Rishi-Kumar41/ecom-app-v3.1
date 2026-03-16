@@ -1,14 +1,68 @@
+<!-- client/src/pages/login/login.component.html -->
 <div class="box">
   <div class="card">
-    <h2>Login</h2>
-    <form (ngSubmit)="submit()">
-      <div class="label">Email</div>
-      <input class="input" [(ngModel)]="email" name="email" type="email" required />
-      <div class="label">Password</div>
-      <input class="input" [(ngModel)]="password" name="password" type="password" required />
-      <button class="btn" [disabled]="loading" type="submit" style="margin-top:12px">Login</button>
-      <p *ngIf="error" style="color:red">{{error}}</p>
+    <h2 style="margin-top:0">Sign in</h2>
+
+    <!-- Mode toggle (UX hint; server still enforces the role) -->
+    <div style="display:flex; gap:8px; align-items:center; margin-bottom:12px">
+      <button type="button"
+              class="btn"
+              [class.secondary]="mode !== 'user'"
+              (click)="setMode('user')"
+              [disabled]="loading">
+        Login as User
+      </button>
+
+      <button type="button"
+              class="btn"
+              [class.secondary]="mode !== 'admin'"
+              (click)="setMode('admin')"
+              [disabled]="loading">
+        Login as Support
+      </button>
+
+      <span class="muted" style="margin-left:auto">
+        Selected: <strong>{{ mode === 'admin' ? 'Support (Admin)' : 'User' }}</strong>
+      </span>
+    </div>
+
+    <!-- Error banner -->
+    <div *ngIf="error" style="color:#b91c1c; background:#fee2e2; border:1px solid #fecaca; padding:8px; border-radius:6px; margin-bottom:12px">
+      {{ error }}
+    </div>
+
+    <!-- Form -->
+    <form (ngSubmit)="submit()" autocomplete="off" novalidate>
+      <label class="label" for="email">Email</label>
+      <input id="email"
+             class="input"
+             name="email"
+             type="email"
+             [(ngModel)]="email"
+             required
+             [disabled]="loading"
+             placeholder="you@example.com" />
+
+      <label class="label" for="password" style="margin-top:10px">Password</label>
+      <input id="password"
+             class="input"
+             name="password"
+             type="password"
+             [(ngModel)]="password"
+             required
+             [disabled]="loading"
+             placeholder="••••••••" />
+
+      <div style="display:flex; gap:8px; align-items:center; margin-top:12px">
+        <button class="btn" type="submit" [disabled]="loading || !email || !password">
+          {{ loading ? 'Signing in…' : (mode === 'admin' ? 'Login as Support' : 'Login as User') }}
+        </button>
+        <span class="muted" *ngIf="!loading">Press Enter to submit</span>
+      </div>
     </form>
-    <p>New user? <a class="link" routerLink="/register">Register</a></p>
+
+    <p class="muted" style="margin-top:12px">
+      If you select <strong>Login as Support</strong> but your account isn't an admin, sign-in will be blocked with a message.
+    </p>
   </div>
 </div>

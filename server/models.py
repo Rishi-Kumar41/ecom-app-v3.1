@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Enum, Text
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Enum as SAEnum, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 import enum
@@ -8,6 +8,12 @@ class OrderStatus(str, enum.Enum):
     PENDING_PAYMENT = "PENDING_PAYMENT"
     PAID = "PAID"
     CANCELLED = "CANCELLED"
+
+
+# User roles for authorization gates
+class UserRole(str, enum.Enum):
+    user = "user"
+    admin = "admin"
 
 class User(Base):
     __tablename__ = "users"
@@ -22,7 +28,11 @@ class User(Base):
 
     # User -> Orders relationship
     orders = relationship("Order", back_populates="user")
-
+    role = Column(
+        SAEnum(UserRole, name="user_role"),
+        nullable=False,
+        server_default=UserRole.user.value  # default at DB level
+    )
 
 class CartItem(Base):
     __tablename__ = "cart_items"

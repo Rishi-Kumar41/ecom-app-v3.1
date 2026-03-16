@@ -2,6 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException, Request, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
+from fastapi import APIRouter
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, asc, desc
 from typing import List, Optional
@@ -15,10 +16,11 @@ stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 stripe_webhook_secret=os.getenv("STRIPE_WEBHOOK_SECRET")
 
 from database import Base, engine, get_db
-from models import User, Product, Order, OrderItem, OrderStatus, Payment, CartItem
-from schemas import UserCreate, UserOut, TokenOut, ProductOut, OrderCreate, OrderOut
+from models import User, Product, Order, OrderItem, OrderStatus, Payment, CartItem, UserRole
+from schemas import UserCreate, UserOut, TokenOut, ProductOut, OrderCreate, OrderOut, AdminProductCreate
 from auth import hash_password, verify_password, create_access_token, get_current_user
 from seed import seed_products
+from permission import require_roles
 
 Base.metadata.create_all(bind=engine)
 
@@ -31,6 +33,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+admin_router = APIRouter(
+    prefix="/admin",
+    tags=["admin"],
+    dependencies=[Depends(require_roles(UserRole.admin))]  # server-side authz
+)
+
 
 @app.on_event("startup")
 def on_startup():
@@ -54,7 +64,8 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     user = db.query(User).filter(User.email == form_data.username).first()
     if not user or not verify_password(form_data.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    token = create_access_token({"sub": str(user.id)})
+    role_value = getattr(user.role, "value", user.role)  # supports Enum or plain string
+    token = create_access_token({"sub": str(user.id), "role": role_value})
     return {"access_token": token, "token_type": "bearer"}
 
 @app.get("/me", response_model=UserOut)
@@ -290,3 +301,38 @@ def cancel_order(order_id: int, current_user: User = Depends(get_current_user), 
 
     # Return a proper JSON response
     return {"status": "success", "message": f"Order {order.id} cancelled"}
+
+# admin search (Support UI will call this later)
+@admin_router.get("/search")
+def admin_search(
+    q: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    # For now, return a placeholder result; we’ll implement real search later.
+    return {"q": q, "results": []}
+
+# admin add product (Support UI will call this later)
+@admin_router.post("/products", response_model=ProductOut)
+def admin_add_product(
+    payload: AdminProductCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    # Create & persist
+    p = Product(
+        name=payload.name.strip(),
+        description=payload.description.strip(),      # NOT NULL in DB
+        category=(payload.category or None),
+        price_cents=payload.price_cents,
+        image_url=(payload.image_url or None),
+        stock=payload.stock,
+    )
+    db.add(p)
+    db.commit()
+    db.refresh(p)
+
+    # Return the mapped output
+    return product_to_out(p)
+
+app.include_router(admin_router)

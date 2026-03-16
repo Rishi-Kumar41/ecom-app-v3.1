@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr, Field
 from typing import List, Optional, Dict
-from models import OrderStatus
+from models import OrderStatus, UserRole
 
 class UserCreate(BaseModel):
     name: str
@@ -12,9 +12,10 @@ class UserOut(BaseModel):
     name: str
     email: EmailStr
     # NEW ↓↓↓
+    role: UserRole
     default_shipping_address: Optional[str] = None
     default_contact_phone: Optional[str] = None
-    # NEW ↑↑↑
+    # 
     class Config:
         from_attributes = True
 
@@ -75,3 +76,11 @@ class OrderOut(BaseModel):
 class PaymentSessionOut(BaseModel):
     payment_url: str
 
+
+class AdminProductCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=200)
+    category: Optional[str] = None
+    price_cents: int = Field(ge=0)
+    stock: int = Field(ge=0)
+    description: str = Field(min_length=1)   # NOT NULL in DB
+    image_url: Optional[str] = None

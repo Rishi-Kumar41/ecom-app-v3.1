@@ -1,0 +1,34 @@
+/* client/src/pages/support/add-product/add-product.component.css */
+
+.addp {
+  padding: 16px;
+}
+
+.title {
+  margin: 0 0 12px 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 10px 12px;
+  margin-bottom: 12px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.req {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.tips {
+  margin-top: 10px;
+}
+
+/* Uses your global utility classes: .card, .label, .input, .btn, .muted, .secondary */

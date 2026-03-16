@@ -1,0 +1,27 @@
+/* client/src/pages/support/support-layout.component.css */
+
+.support-card {
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.title {
+  margin: 0 0 12px 0;
+}
+
+.subtitle {
+  margin: 0 0 8px 0;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.actions {
+  margin-top: 16px;
+}
+
+/* Uses your existing utility classes:
+   .card, .label, .input, .btn, .muted */

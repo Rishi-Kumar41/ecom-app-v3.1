@@ -1,0 +1,67 @@
+<!-- client/src/pages/support/add-product/add-product.component.html -->
+<div class="card addp">
+  <h2 class="title">Add product</h2>
+
+  <div class="grid">
+    <label class="label">Name <span class="req">*</span></label>
+    <input
+      class="input"
+      [(ngModel)]="name"
+      placeholder="e.g., Galaxy S24 Ultra"
+    />
+
+    <label class="label">Category</label>
+    <input class="input" [(ngModel)]="category" placeholder="e.g., phones" />
+
+    <label class="label">Price (paise) <span class="req">*</span></label>
+    <input
+      class="input"
+      type="number"
+      min="0"
+      step="1"
+      [(ngModel)]="price_cents"
+      placeholder="e.g., 99900 for ₹999.00"
+    />
+
+    <label class="label">Stock <span class="req">*</span></label>
+    <input
+      class="input"
+      type="number"
+      min="0"
+      step="1"
+      [(ngModel)]="stock"
+      placeholder="e.g., 25"
+    />
+
+    <label class="label">Image URL</label>
+    <input
+      class="input"
+      [(ngModel)]="image_url"
+      placeholder="/assets/products/s24ultra.jpg"
+    />
+
+    <label class="label">Description</label>
+    <textarea
+      class="input"
+      rows="4"
+      [(ngModel)]="description"
+      placeholder="Short description (optional)"
+    ></textarea>
+  </div>
+
+  <div class="actions">
+    <button class="btn" (click)="save()" [disabled]="saving || !canSave">
+      {{ saving ? "Saving…" : "Save" }}
+    </button>
+    <button class="btn secondary" (click)="back()" [disabled]="saving">
+      Back to Support
+    </button>
+    <span *ngIf="ok" style="color: #166534; margin-left: 8px">{{ ok }}</span>
+    <span *ngIf="err" style="color: #b91c1c; margin-left: 8px">{{ err }}</span>
+  </div>
+
+  <p class="muted tips">
+    <strong>Tips</strong>: Price is in paise (int). Image can be a local asset
+    path (e.g., <code>/assets/products/...jpg</code>).
+  </p>
+</div>

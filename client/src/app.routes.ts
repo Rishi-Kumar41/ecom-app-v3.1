@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
+import { userGuard } from './guards/user.guard';
 
 import { ProductsComponent } from './pages/products/products.component';
 import { ProductDetailsComponent } from './pages/product-details/product-details.component';
@@ -11,6 +12,7 @@ import { OrderDetailsComponent } from './pages/order-details/order-details.compo
 import { ProfileComponent } from './pages/profile/profile.component';
 import { LoginComponent } from './pages/login/login.component';
 import { RegisterComponent } from './pages/register/register.component';
+import { roleGuard } from './guards/role.guard';
 // import { AiAgentComponent } from './pages/ai-agent/ai-agent.component';
 
 export const routes: Routes = [
@@ -32,44 +34,64 @@ export const routes: Routes = [
     path: '',
     canActivate: [authGuard],
     children: [
-      { path: '', pathMatch: 'full', redirectTo: 'products' }, 
+      { path: '', pathMatch: 'full', redirectTo: 'products' },
+      {
+        path: 'support',
+        canActivate: [roleGuard],  // must be admin
+        loadComponent: () =>
+          import('./pages/support/support-layout.component').then(m => m.SupportLayoutComponent),
+      },
+      {
+        path: 'support/products/new',
+        canActivate: [roleGuard],  // must be admin
+        loadComponent: () =>
+          import('./pages/support/add-product/add-product.component').then(m => m.AddProductComponent),
+      },
       {
         path: 'logout',
         loadComponent: () => import('./pages/logout/logout.component').then(m => m.LogoutComponent),
       },
       {
         path: 'products',
+        canActivate: [userGuard],
         loadComponent: () =>
           import('./pages/products/products.component').then(m => m.ProductsComponent),
       },
       {
         path: 'product/:id',
+        canActivate: [userGuard],
         loadComponent: () =>
           import('./pages/product-details/product-details.component').then(m => m.ProductDetailsComponent),
       },
       { path: 'cart',
+        canActivate: [userGuard],
         loadComponent: () => import('./pages/cart/cart.component').then(m => m.CartComponent)
       },
       {
         path: 'checkout',
+        canActivate: [userGuard],
         loadComponent: () =>
           import('./pages/checkout/checkout.component').then(m => m.CheckoutComponent),
       },
       { path: 'payment/:orderId',
+        canActivate: [userGuard],
         loadComponent: () => import('./pages/payment/payment.component').then(m => m.PaymentComponent)
       },
       {
         path: 'orders',
+        canActivate: [userGuard],
         loadComponent: () =>
           import('./pages/orders/orders.component').then(m => m.OrdersComponent),
       },
       {
         path: 'order/:orderId',
+        canActivate: [userGuard],
         loadComponent: () =>
           import('./pages/order-details/order-details.component').then(m => m.OrderDetailsComponent),
       },
       {
         path: 'profile',
+        canActivate: [userGuard],
         loadComponent: () =>
           import('./pages/profile/profile.component').then(m => m.ProfileComponent),
       },

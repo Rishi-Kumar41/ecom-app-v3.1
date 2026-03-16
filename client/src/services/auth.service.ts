@@ -21,6 +21,7 @@ export interface User {
   id: number;
   name: string;
   email: string;
+  role: 'user' | 'admin'; 
   default_shipping_address?: string; // <-- NEW
   default_contact_phone?: string; // <-- NEW
 }
@@ -99,6 +100,16 @@ export class AuthService {
   savedPhone(): string {
     return this.user()?.default_contact_phone ?? "";
   }
+
+
+  isAdmin(): boolean {
+    return this.user()?.role === 'admin';
+  }
+
+  userRole(): 'user' | 'admin' | undefined {
+    return this.user()?.role;
+  }
+
 }
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const token = localStorage.getItem("ecom_token");
