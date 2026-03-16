@@ -37,7 +37,7 @@ class ProductOut(BaseModel):
     price_cents: int
     image_url: Optional[str]
     stock: int
-    specs: Optional[Dict[str, str]]
+    specs: Optional[dict] = None
     class Config:
         from_attributes = True
 
@@ -84,3 +84,4 @@ class AdminProductCreate(BaseModel):
     stock: int = Field(ge=0)
     description: str = Field(min_length=1)   # NOT NULL in DB
     image_url: Optional[str] = None
+    specs: Optional[Dict[str, str]] 

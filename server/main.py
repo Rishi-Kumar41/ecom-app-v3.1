@@ -71,6 +71,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
     token = create_access_token(user) 
+    return {"access_token": token, "token_type": "bearer"}  
 
 @app.get("/me", response_model=UserOut)
 def me(current_user: User = Depends(get_current_user)):
@@ -331,6 +332,7 @@ def admin_add_product(
         price_cents=payload.price_cents,
         image_url=(payload.image_url or None),
         stock=payload.stock,
+        specs_json=json.dumps(payload.specs) if payload.specs else None
     )
     db.add(p)
     db.commit()

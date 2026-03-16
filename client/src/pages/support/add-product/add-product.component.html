@@ -47,6 +47,16 @@
       [(ngModel)]="description"
       placeholder="Short description (optional)"
     ></textarea>
+    <label class="label">Product Specs</label>
+    <textarea
+     class="input"
+     rows="5"
+     [(ngModel)]="specs_text"
+    placeholder="Example:
+                Display: 6.2 AMOLED
+                Chip: Snapdragon 8 Gen 3
+                Storage: 128GB"
+    ></textarea>
   </div>
 
   <div class="actions">

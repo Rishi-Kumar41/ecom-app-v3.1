@@ -11,6 +11,7 @@ export interface AdminCreateProductPayload {
   stock: number;              // integer qty
   description?: string | null;
   image_url?: string | null;
+  specs?: Record<string, string>;
 }
 
 @Injectable({ providedIn: 'root' })
