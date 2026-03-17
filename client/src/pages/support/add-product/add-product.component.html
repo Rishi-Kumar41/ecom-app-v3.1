@@ -1,4 +1,3 @@
-<!-- client/src/pages/support/add-product/add-product.component.html -->
 <div class="card addp">
   <h2 class="title">Add product</h2>
 
@@ -40,23 +39,34 @@
       placeholder="/assets/products/s24ultra.jpg"
     />
 
-    <label class="label">Description</label>
+    <label class="label">Product Specs<span class="req">*</span></label>
+    <textarea
+      class="input"
+      rows="5"
+      [(ngModel)]="specs_text"
+      placeholder="Example:
+Display: 6.2 AMOLED
+Chip: Snapdragon 8 Gen 3
+Storage: 128GB"
+    ></textarea>
+
+    <label class="label">Description<span class="req">*</span></label>
     <textarea
       class="input"
       rows="4"
       [(ngModel)]="description"
-      placeholder="Short description (optional)"
+      placeholder="Short description"
     ></textarea>
-    <label class="label">Product Specs</label>
-    <textarea
-     class="input"
-     rows="5"
-     [(ngModel)]="specs_text"
-    placeholder="Example:
-                Display: 6.2 AMOLED
-                Chip: Snapdragon 8 Gen 3
-                Storage: 128GB"
-    ></textarea>
+
+    <div style="display: justify-content;">
+      <button
+        type="button"
+        class="btn secondary"
+        (click)="generateDescription()"
+        [disabled]="generating">
+        {{ generating ? "Generating..." : "Generate Description" }}
+      </button>
+      </div>
   </div>
 
   <div class="actions">

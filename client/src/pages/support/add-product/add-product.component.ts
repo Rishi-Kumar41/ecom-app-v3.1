@@ -25,7 +25,7 @@ export class AddProductComponent {
   saving = false;
   ok = '';
   err = '';
-
+  generating = false;
   constructor(private router: Router, private admin: AdminService) {}
 
  
@@ -91,6 +91,49 @@ export class AddProductComponent {
       this.saving = false;
       console.error(e);
     },
+  });
+}
+generateDescription() {
+  if (!this.name) {
+    this.err = "Please enter product name";
+    return;
+  }
+
+  this.generating = true;
+  this.err = '';
+
+  // 🔹 Convert textarea specs into object
+  const specsObj: Record<string, string> = {};
+
+  if (this.specs_text) {
+    this.specs_text.split('\n').forEach(line => {
+      const parts = line.split(':');
+
+      if (parts.length >= 2) {
+        const key = parts[0].trim();
+        const value = parts.slice(1).join(':').trim();
+
+        if (key) {
+          specsObj[key] = value;
+        }
+      }
+    });
+  }
+
+  this.admin.generateDescription({
+    name: this.name,
+    category: this.category,
+    specs: specsObj
+  }).subscribe({
+    next: (res: any) => {
+      this.description = res.description;
+      this.generating = false;
+    },
+    error: (e) => {
+      this.err = e?.error?.detail || "Failed to generate description";
+      this.generating = false;
+      console.error(e);
+    }
   });
 }
 

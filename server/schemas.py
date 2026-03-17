@@ -85,3 +85,8 @@ class AdminProductCreate(BaseModel):
     description: str = Field(min_length=1)   # NOT NULL in DB
     image_url: Optional[str] = None
     specs: Optional[Dict[str, str]] 
+
+class GenerateDescIn(BaseModel):
+    name: str
+    specs: Optional[Dict[str, str]] = None
+    category: Optional[str] = None

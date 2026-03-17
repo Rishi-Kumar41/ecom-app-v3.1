@@ -31,6 +31,7 @@ from schemas import UserCreate, UserOut, TokenOut, ProductOut, OrderCreate, Orde
 from auth import hash_password, verify_password, create_access_token, get_current_user
 from seed import seed_products
 from permission import require_roles
+from schemas import GenerateDescIn
 
 Base.metadata.create_all(bind=engine)
 
@@ -396,3 +397,21 @@ async def ai_chat(body: ChatIn):
     except Exception as e:
         # Generic upstream failure (network, timeout, etc.)
         raise HTTPException(status_code=502, detail=f"llm upstream error: {e}")
+
+@app.post("/ai/generate-description")
+async def generate_description(body: GenerateDescIn):
+    specs_text = ""
+    if body.specs:
+        for k, v in body.specs.items():
+            specs_text += f"- {k}: {v}\n"
+
+    prompt = f"""
+Create a product description for {body.name} with the following specs:
+{specs_text}
+Please include the key features and benefits of the product in the description.
+Limit the description to. 8-10 lines
+"""
+
+    data = await llm_chat(prompt=prompt)
+
+    return {"description": data.get("output")}

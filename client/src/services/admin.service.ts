@@ -19,7 +19,8 @@ export class AdminService {
   constructor(private http: HttpClient, private api: ApiService) {}
 
   createProduct(payload: AdminCreateProductPayload): Observable<any> {
-    // Backend endpoint already exists under /admin/products and requires admin role.
     return this.http.post<any>(`${this.api.base}/admin/products`, payload);
   }
+  generateDescription(payload: any): Observable<any> {
+    return this.http.post<any>(`${this.api.base}/ai/generate-description`, payload);}
 }
