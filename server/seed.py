@@ -9,7 +9,7 @@ SEED_PRODUCTS = [
         "description": "6.2\\\" Dynamic AMOLED, Snapdragon 8 Gen 3, 128GB",
         "category": "Phones",
         "price_cents": 69900,
-        "image_url": "https://images.samsung.com/is/image/samsung/p6pim/in/s24.jpg",
+        "image_url": "/assets/products/s24.jpg'",
         "stock": 25,
         "specs_json": json.dumps({
             "Display": "6.2\\\" AMOLED",
@@ -22,7 +22,7 @@ SEED_PRODUCTS = [
         "description": "6.8\\\" QHD+ AMOLED, 200MP camera, 256GB",
         "category": "Phones",
         "price_cents": 129900,
-        "image_url": "https://images.samsung.com/is/image/samsung/p6pim/in/s24ultra.jpg",
+        "image_url": "/assets/products/s24ultra.jpg",
         "stock": 18,
         "specs_json": json.dumps({
             "Display": "6.8\\\" QHD+",
@@ -35,7 +35,7 @@ SEED_PRODUCTS = [
         "description": "ANC earbuds with Hi-Fi sound",
         "category": "Audio",
         "price_cents": 14990,
-        "image_url": "https://images.samsung.com/is/image/samsung/p6pim/in/buds2pro.jpg",
+        "image_url": "/assets/products/buds2pro.jpg",
         "stock": 60,
         "specs_json": json.dumps({
             "ANC": "Yes",
@@ -48,7 +48,7 @@ SEED_PRODUCTS = [
         "description": "Fitness tracking, AMOLED display, Wear OS",
         "category": "Wearables",
         "price_cents": 29990,
-        "image_url": "https://images.samsung.com/is/image/samsung/p6pim/in/watch6.jpg",
+        "image_url": "/assets/products/watch6.jpg",
         "stock": 40,
         "specs_json": json.dumps({
             "Size": "44mm",
@@ -61,7 +61,7 @@ SEED_PRODUCTS = [
         "description": "UHD IPS, HDR10, USB-C",
         "category": "Monitors",
         "price_cents": 34990,
-        "image_url": "https://images.samsung.com/is/image/samsung/p6pim/in/monitor27.jpg",
+        "image_url": "/assets/products/monitor27.jpg",
         "stock": 15,
         "specs_json": json.dumps({
             "Resolution": "3840x2160",
@@ -74,7 +74,7 @@ SEED_PRODUCTS = [
         "description": "USB 3.2 Gen 2, up to 1050 MB/s",
         "category": "Storage",
         "price_cents": 8990,
-        "image_url": "https://images.samsung.com/is/image/samsung/p6pim/in/t7-1tb.jpg",
+        "image_url": "/assets/products/t7-1tb.jpg",
         "stock": 50,
         "specs_json": json.dumps({
             "Capacity": "1TB",
@@ -87,7 +87,7 @@ SEED_PRODUCTS = [
         "description": "PCIe 4.0 NVMe SSD",
         "category": "Storage",
         "price_cents": 16990,
-        "image_url": "https://images.samsung.com/is/image/samsung/p6pim/in/990pro-2tb.jpg",
+        "image_url": "/assets/products/990pro-2tb.jpg",
         "stock": 30,
         "specs_json": json.dumps({
             "Capacity": "2TB",
@@ -100,7 +100,7 @@ SEED_PRODUCTS = [
         "description": "4K QLED, Quantum HDR, Smart TV",
         "category": "TVs",
         "price_cents": 104990,
-        "image_url": "https://images.samsung.com/is/image/samsung/p6pim/in/qled65.jpg",
+        "image_url": "/assets/products/qled65.jpg",
         "stock": 8,
         "specs_json": json.dumps({
             "Size": "65\\\"",
@@ -113,7 +113,7 @@ SEED_PRODUCTS = [
         "description": "Intel i7, 16GB RAM, 512GB SSD",
         "category": "Laptops",
         "price_cents": 72990,
-        "image_url": "https://images.samsung.com/is/image/samsung/p6pim/in/laptop15.jpg",
+        "image_url": "/assets/products/laptop15.jpg",
         "stock": 12,
         "specs_json": json.dumps({
             "CPU": "Intel i7",
@@ -126,7 +126,7 @@ SEED_PRODUCTS = [
         "description": "Charge phone + earbuds simultaneously",
         "category": "Accessories",
         "price_cents": 3990,
-        "image_url": "https://images.samsung.com/is/image/samsung/p6pim/in/chargerduo.jpg",
+        "image_url": "/assets/products/chargerduo.jpg",
         "stock": 70,
         "specs_json": json.dumps({
             "Output": "15W",

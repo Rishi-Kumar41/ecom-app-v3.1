@@ -14,6 +14,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# from typing import Optional
+import httpx
+# from fastapi import HTTPException
+from pydantic import BaseModel, Field
+from llm_client import get_client, close_client, health as llm_health, chat as llm_chat
+
 import stripe
 
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
@@ -48,6 +54,8 @@ admin_router = APIRouter(
 
 @app.on_event("startup")
 def on_startup():
+    get_client()
+
     db = next(get_db())
     seed_products(db)
 
@@ -342,3 +350,49 @@ def admin_add_product(
     return product_to_out(p)
 
 app.include_router(admin_router)
+
+# #warm up the HTTP client on startup; close on shutdown
+# @app.on_event("startup")
+# async def _startup_llm_client():
+#     get_client()  # creates the shared AsyncClient (non-blocking)
+
+@app.on_event("shutdown")
+async def _shutdown_llm_client():
+    await close_client()
+
+
+# Request/Response models for /ai/chat
+class ChatIn(BaseModel):
+    prompt: str = Field(..., min_length=1)
+    system: Optional[str] = None
+    temperature: float = Field(default=0.7, ge=0.0, le=2.0)
+    max_tokens: int = Field(default=512, ge=1, le=4096)
+
+class ChatOut(BaseModel):
+    output: str
+    provider: str
+    model: str
+
+
+# New endpoints that forward to the LLM service on :8500
+
+@app.get("/ai/health")
+async def ai_health():
+    return await llm_health()
+
+@app.post("/ai/chat", response_model=ChatOut)
+async def ai_chat(body: ChatIn):
+    try:
+        data = await llm_chat(
+            prompt=body.prompt,
+            system=body.system,
+            temperature=body.temperature,
+            max_tokens=body.max_tokens,
+        )
+        return data
+    except httpx.HTTPStatusError as e:
+        # Forward upstream status & body for easier debugging
+        raise HTTPException(status_code=e.response.status_code, detail=e.response.text)
+    except Exception as e:
+        # Generic upstream failure (network, timeout, etc.)
+        raise HTTPException(status_code=502, detail=f"llm upstream error: {e}")
