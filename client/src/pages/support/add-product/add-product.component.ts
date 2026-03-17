@@ -72,8 +72,6 @@ export class AddProductComponent {
     stock: this.stock ?? 0,
     description: this.description.trim() || null,
     image_url: this.image_url.trim() || null,
-
-    // ✅ send object instead of string
     specs: specsObj
   };
 
