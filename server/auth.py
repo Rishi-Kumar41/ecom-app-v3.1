@@ -5,6 +5,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
+from passlib.exc import UnknownHashError
 import jwt
 
 from database import get_db
@@ -14,14 +15,25 @@ JWT_SECRET = "dev-secret-please-change"
 JWT_ALGO = "HS256"
 ACCESS_TOKEN_EXPIRES_MIN = 60 * 24
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(
+    schemes=["bcrypt_sha256","bcrypt"],
+    deprecated="auto"
+)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)
 
+# def verify_password(plain: str, hashed: str) -> bool:
+#     return pwd_context.verify(plain, hashed)
+
 def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
+    try:
+        return pwd_context.verify(plain, hashed)
+    except UnknownHashError:
+        # Stored hash is unrecognized (plain, NULL, other scheme, or corrupted)
+        return False
+
 
 def create_access_token(user: User, expires_minutes: int = ACCESS_TOKEN_EXPIRES_MIN) -> str:
     to_encode = {

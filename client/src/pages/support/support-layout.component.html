@@ -11,7 +11,7 @@
       [(ngModel)]="q"
       placeholder="Search (orders, users, products...)"
     />
-    <button class="btn" (click)="goToSearch()">Search</button>
+    <button class="btn" (click)="search()">Search</button>
   </div>
 
   <!-- Add product (placeholder route for now) -->
@@ -23,7 +23,37 @@
 <!-- Workspace placeholder -->
 <div class="card">
   <h3 class="subtitle">Workspace</h3>
-  <p class="muted">
+  <!-- <p class="muted">
     This area will show search results or admin tools. Coming soon.
-  </p>
+  </p> -->
+  <!-- Results Panel (drop this inside your Workspace card) -->
+<div style="margin-top: 12px;">
+  <div *ngIf="loading">Loading…</div>
+  <div *ngIf="error" style="color:#b91c1c">{{ error }}</div>
+
+  <ul *ngIf="!loading && !error && results.length" class="results">
+    <li *ngFor="let r of results" style="padding:8px 0; border-bottom:1px solid #eee;">
+      <div style="display:flex; gap:8px; align-items:center;">
+        <span style="font-size:12px; background:#eef; color:#334; padding:2px 6px; border-radius:4px;">
+          {{ r.source }}
+        </span>
+        <span style="font-size:12px; color:#666;">score: {{ r.score }}</span>
+      </div>
+      <div style="font-weight:600; margin-top:4px;">{{ r.title || '(untitled)' }}</div>
+      <div style="color:#444; margin-top:2px;">{{ r.snippet }}</div>
+
+      <a
+        *ngIf="r.product_id"
+        [routerLink]="['/product', r.product_id]"
+        style="display:inline-block; margin-top:6px;"
+      >
+        View product
+      </a>
+    </li>
+  </ul>
+
+  <div *ngIf="!loading && !error && !results.length" class="muted">
+    No results yet.
+  </div>
+</div>
 </div>

@@ -27,7 +27,16 @@ PROJECT LAYOUT
 
 ---
 
-PREREQUISITES
+
+# Server (FastAPI + Postgres + pgvector + local embeddings)
+
+This service provides:
+- **Vector retrieval** in Postgres (pgvector + HNSW + cosine)
+- **Admin search**: `GET /admin/search`
+- **RAG answers (Groq)**: `POST /ai/answer` — grounded in DB
+- **LLM proxy**: `/ai/chat`, `/ai/generate-description` (Groq-backed)
+
+PREREQUISITES (macOS)
 
 - Python 3.9+ (3.11 recommended)
 - Node.js LTS compatible with Angular 19 (e.g., 20.11+ or 22+)
@@ -35,6 +44,13 @@ PREREQUISITES
 - macOS paths are used below; adjust for other OSes
 
 Tip: If you use nvm, run: nvm use 20 (or 22) when working in client/.
+
+**PostgreSQL 18 (Homebrew) + pgvector**
+```bash
+brew update
+brew install postgresql@18
+brew install pgvector
+brew services restart postgresql@18
 
 ---
 
@@ -46,8 +62,12 @@ Create & activate venv, install deps
   python3 -m venv .venv
   source .venv/bin/activate
   pip install -r requirements.txt
+  # (Optional but recommended for embeddings performance on macOS)
+  pip install torch --extra-index-url https://download.pytorch.org/whl/cpu
+  # We use local embeddings (BAAI/bge-m3, 1024‑dim) for indexing and queries. First run downloads the model to your HF cache.
+
 ```
-The app uses SQLite with a file named ecom.db in server/. It is created automatically on first run (and products are auto‑seeded).
+<!-- The app uses SQLite with a file named ecom.db in server/. It is created automatically on first run (and products are auto‑seeded). older flow--> 
 
 CORS (dev)
 
@@ -79,7 +99,7 @@ Swagger (interactive API docs)
 
 2) DATABASE & SEED DATA
 
-- Database file: /Users/rikumar/Documents/ecom-app-v3.1/server/ecom.db
+<!-- - Database file: /Users/rikumar/Documents/ecom-app-v3.1/server/ecom.db  Older-->
 - CLI quick look:
     cd /Users/rikumar/Documents/ecom-app-v3.1/server
     sqlite3 ecom.db ".tables"
@@ -87,7 +107,34 @@ Swagger (interactive API docs)
 - Reseed (dev‑only): delete the DB and restart the API:
     rm -f ecom.db
     uvicorn main:app --reload --port 8000
-
+- Apply the SQL files committed under server/sql/:
+    # 1. Create the documents table + HNSW index + tsvector
+    psql "postgresql://user:pass@localhost:5432/ecom_db" \
+      -v ON_ERROR_STOP=1 \
+      -f server/sql/2026-02-26_admin_documents.sql
+    # 2. Switch embedding dimension to 1024 for BGE-M3 and recreate HNSW inde
+    psql "postgresql://user:pass@localhost:5432/ecom_db" \
+      -v ON_ERROR_STOP=1 \
+      -f server/sql/2026-02-27_change_embedding_dim_to_1024.sql
+  -> tsvector + GIN are ready for optional keyword/BM25 hybrid later (ranking via ts_rank / ts_rank_cd).
+- Ingest products → embeddings (local)
+    cd server
+    source .venv/bin/activate
+    # First small run (downloads the model on first use)
+    python scripts/ingest_products.py --provider local --model "BAAI/bge-m3" --limit 10
+    # Full run
+    python scripts/ingest_products.py --provider local --model "BAAI/bge-m3"
+- Check rows:
+    psql "postgresql://user:pass@localhost:5432/ecom_db" \
+    -c "SELECT COUNT(*) FROM admin_documents WHERE source='product' AND embedding IS NOT NULL;"
+- Run the API
+- Test endpoints
+    # admin search
+    -> curl -s "http://127.0.0.1:8000/admin/search?q=Samsung%20Galaxy&k=5" -H "Authorization: Bearer <admin_token>" | jq
+    # RAG answer (Groq‑backed; grounded in DB):
+    -> curl -s http://127.0.0.1:8000/ai/answer \
+       -H "Content-Type: application/json" \
+       -d '{"query":"Suggest phones around 1299","k":12,"products":5}' | jq
 ---
 
 3) FRONTEND — ANGULAR 19
@@ -115,7 +162,19 @@ Polyfills & source maps (dev)
 
 ---
 
-4) LOCAL PRODUCT IMAGES (ASSETS)
+4) **PostgreSQL 18 (Homebrew) + pgvector**
+```bash
+brew update
+brew install postgresql@18
+brew install pgvector
+brew services restart postgresql@18
+
+Enable pgvector in your database:
+psql "postgresql://user:pass@localhost:5432/ecom_db" -c "CREATE EXTENSION IF NOT EXISTS vector;"
+
+---
+
+5) LOCAL PRODUCT IMAGES (ASSETS)
 
 The seed data uses local assets at /assets/products/.... Make sure the folder exists:
   client/src/assets/products/
@@ -124,9 +183,9 @@ If you need placeholder images, drop JPGs into this folder with names referenced
 
 ---
 
-5) FEATURES IMPLEMENTED
+6) FEATURES IMPLEMENTED
 
-5.1 Saved address (Profile) → Prefill (Checkout)
+6.1 Saved address (Profile) → Prefill (Checkout)
 
 - Backend changes:
   - users table: new nullable columns
@@ -146,7 +205,7 @@ If you need placeholder images, drop JPGs into this folder with names referenced
   - Prefill: name, email (from user) + address & phone (from saved profile)
   - Can edit before placing an order
 
-5.2 Orders & Order Details (polish)
+6.2 Orders & Order Details (polish)
 
 - Orders list:
   - Color‑coded status badge (PAID, PENDING_PAYMENT, CANCELLED)
@@ -166,7 +225,7 @@ Badge colors are in src/styles.css:
 
 ---
 
-6) QUICK START (HAPPY PATH)
+7) QUICK START (HAPPY PATH)
 
 1. Start API: uvicorn main:app --reload --port 8000
 2. Start UI: npm start (in client/)
@@ -179,7 +238,7 @@ Badge colors are in src/styles.css:
 
 ---
 
-7) CLI SMOKE TESTS (OPTIONAL)
+8) CLI SMOKE TESTS (OPTIONAL)
 
 # 0) Products
 curl -s http://127.0.0.1:8000/products | head
@@ -210,7 +269,7 @@ curl -s -X POST http://127.0.0.1:8000/orders \
 
 ---
 
-8) TROUBLESHOOTING
+9) TROUBLESHOOTING
 
 CORS error in browser
 - Ensure API middleware allows http://localhost:4200 and http://127.0.0.1:4200
@@ -235,9 +294,20 @@ Environment check
 - UI: Node 20.11+ / 22+
 - API: ensure you’re running the intended virtualenv (source .venv/bin/activate)
 
+CREATE EXTENSION vector fails 
+→ ensure brew install pgvector and that you restarted postgresql@18.
+
+First ingestion is slow 
+→ the model downloads once to your HF cache; subsequent runs are fast.
+
+No results in /ai/answer
+→ ensure ingestion wrote rows; try a query without numbers first (price filter is only applied when we detect a real price).
+
+RAG not calling Groq
+→ Groq is only called after retrieval returns ≥1 product (we added a fallback path so this should almost always happen now).
 ---
 
-9) NOTES & MAINTENANCE
+10) NOTES & MAINTENANCE
 
 - Reseeding: deleting ecom.db will wipe users/orders (demo only) and reseed products.
 - Saved address is stored per user (single default). Extensible to an Address Book later.
