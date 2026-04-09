@@ -2,7 +2,7 @@
 <div class="card support-card">
   <h2 class="title">Support</h2>
 
-  <!-- Search (placeholder for now) -->
+  <!-- Search -->
   <label class="label" for="q">Search</label>
   <div class="row">
     <input
@@ -11,16 +11,41 @@
       [(ngModel)]="q"
       placeholder="Search (orders, users, products...)"
     />
+
+    <!-- NEW: Type filter -->
+    <label class="label" style="margin-left:8px;">Type</label>
+    <select [(ngModel)]="type" class="input" style="width:auto;">
+      <option value="any">All</option>
+      <option value="product">Products</option>
+      <option value="order">Orders</option>
+      <option value="user">Users</option>
+      <option value="policy">Policy</option>
+    </select>
+
+    <!-- NEW: Top-K -->
+    <label class="label" style="margin-left:8px;">Top&nbsp;K</label>
+    <select [(ngModel)]="k" class="input" style="width:auto;">
+      <option [value]="5">5</option>
+      <option [value]="10">10</option>
+      <option [value]="20">20</option>
+    </select>
+
+    <!-- NEW: Hybrid toggle -->
+    <!-- <label class="label" style="display:flex; align-items:center; gap:6px; margin-left:8px;">
+      <input type="checkbox" [(ngModel)]="hybrid" />
+      <span>Hybrid</span>
+    </label> -->
+
     <button class="btn" (click)="search()">Search</button>
   </div>
 
-  <!-- Add product (placeholder route for now) -->
+  <!-- Add product (existing) -->
   <div class="actions">
     <button class="btn" (click)="goToAdd()">Add product</button>
   </div>
 </div>
 
-<!-- Workspace placeholder -->
+<!-- Workspace -->
 <div class="card">
   <h3 class="subtitle">Workspace</h3>
   <!-- <p class="muted">
@@ -38,7 +63,11 @@
           {{ r.source }}
         </span>
         <span style="font-size:12px; color:#666;">score: {{ r.score }}</span>
+        <span *ngIf="r.product_id != null" style="font-size:12px; color:#666;">
+            product_id: {{ r.product_id }}
+          </span>
       </div>
+
       <div style="font-weight:600; margin-top:4px;">{{ r.title || '(untitled)' }}</div>
       <div style="color:#444; margin-top:2px;">{{ r.snippet }}</div>
 
@@ -57,3 +86,4 @@
   </div>
 </div>
 </div>
+<app-assist-floating></app-assist-floating>

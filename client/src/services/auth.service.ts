@@ -63,14 +63,39 @@ export class AuthService {
   isLoggedIn(): boolean {
     return !!this.token();
   }
-  logout(redirectTo: string = '/login') {
-    try { this.cart?.clear?.(); } catch {}
-    localStorage.removeItem(this.tokenKey);
-    localStorage.removeItem(this.userKey);
-    localStorage.removeItem(this.cartKey);
-    // this.cart.clear();
-    this.router.navigate([redirectTo]);
-  }
+  
+logout(redirectTo: string = '/login') {
+  try { this.cart?.clear?.(); } catch {}
+
+  // Clear session/auth data
+  localStorage.removeItem(this.tokenKey);
+  localStorage.removeItem(this.userKey);
+  localStorage.removeItem(this.cartKey);
+
+  // Clear Assist chat/session (per-user + generic)
+  try {
+    // Read user (before it's removed, in case userKey was ecom_user)
+    const raw = localStorage.getItem('ecom_user');
+    let uid = '';
+    if (raw) {
+      const u = JSON.parse(raw);
+      uid = String(u?.id ?? u?.email ?? '').trim();
+    }
+
+    // Generic keys (safe to remove even if unused)
+    localStorage.removeItem('ecom_assist_chat');
+    localStorage.removeItem('ecom_assist_prefs');
+
+    // User-scoped keys
+    if (uid) {
+      localStorage.removeItem(`ecom_assist_chat_${uid}`);
+      localStorage.removeItem(`ecom_assist_prefs_${uid}`);
+    }
+  } catch {}
+
+  this.router.navigate([redirectTo]);
+}
+
   fetchMe() {
     return this.http.get<User>(`${this.api.base}/me`);
   }

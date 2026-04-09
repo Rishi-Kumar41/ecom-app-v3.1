@@ -1,0 +1,115 @@
+.assist-fab {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  font-size: 20px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.2);
+  cursor: pointer;
+  z-index: 1000;
+}
+
+.assist-panel {
+  position: fixed;
+  right: 22px;
+  bottom: 84px;
+  width: 360px;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0,0,0,.18);
+  z-index: 1000;
+}
+
+.assist-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #eee;
+  background: #fafafa;
+}
+
+.assist-header .spacer { flex: 1; }
+
+.assist-header .opt {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #444;
+}
+
+.assist-header .icon {
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: #444;
+}
+
+.assist-body {
+  padding: 10px 12px;
+  overflow: auto;
+  min-height: 140px;
+  max-height: 46vh;
+}
+
+.placeholder { color:#6b7280; font-size: 12px; }
+
+.turn {
+  display: flex;
+  margin: 6px 0;
+}
+
+.turn.me { justify-content: flex-end; }
+
+.bubble {
+  max-width: 85%;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: #eef2ff;
+  color: #111827;
+  white-space: pre-wrap;
+}
+
+.turn.me .bubble { background: #e6f7ff; }
+
+.error { color: #b91c1c; font-size: 12px; margin-top: 6px; }
+
+.assist-input {
+  display: flex;
+  gap: 8px;
+  padding: 10px 12px;
+  border-top: 1px solid #eee;
+}
+
+.assist-input input {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.btn, .btn-outline {
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.btn { background:#2563eb; color:#fff; }
+.btn:disabled { opacity: .6; cursor:not-allowed; }
+.btn-outline { background:#fff; border-color:#ddd; }
+
+.opt select {
+    padding: 0;
+}

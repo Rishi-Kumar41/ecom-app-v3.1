@@ -1,0 +1,69 @@
+<!-- Floating action button -->
+<button
+  class="assist-fab"
+  title="Assist me"
+  (click)="toggle()"
+>
+  💬
+</button>
+
+<!-- Floating panel -->
+<div *ngIf="open" class="assist-panel">
+  <div class="assist-header">
+    <strong>Assist</strong>
+
+    <div class="spacer"></div>
+
+    <!-- Options (you can hide these if you want fewer controls) -->
+    <!-- <label class="opt">
+      <input type="checkbox" [(ngModel)]="hybrid" />
+      <span>Hybrid</span>
+    </label> -->
+
+    <label class="opt">
+      K:
+      <select [(ngModel)]="k">
+        <option [ngValue]="5">5</option>
+        <option [ngValue]="12">12</option>
+        <option [ngValue]="20">20</option>
+      </select>
+    </label>
+
+    <label class="opt">
+      Products:
+      <select [(ngModel)]="products">
+        <option [ngValue]="3">3</option>
+        <option [ngValue]="5">5</option>
+        <option [ngValue]="8">8</option>
+      </select>
+    </label>
+
+    <button class="icon" (click)="toggle()" title="Close">✕</button>
+  </div>
+
+  <div class="assist-body">
+    <div *ngIf="chat.length === 0" class="placeholder">
+      Ask anything you need—products, orders, returns, policies.
+    </div>
+
+    <div *ngFor="let t of chat" class="turn" [class.me]="t.role === 'user'">
+      <div class="bubble">{{ t.text }}</div>
+    </div>
+
+    <div *ngIf="sending" class="turn">
+      <div class="bubble">…</div>
+    </div>
+
+    <div *ngIf="error" class="error">{{ error }}</div>
+  </div>
+
+  <div class="assist-input">
+    <input
+      [(ngModel)]="q"
+      (keyup.enter)="send()"
+      placeholder="Type your message…"
+    />
+    <button class="btn" (click)="send()" [disabled]="sending">Send</button>
+    <button class="btn-outline" (click)="clear()" [disabled]="sending || chat.length===0">Clear</button>
+  </div>
+</div>

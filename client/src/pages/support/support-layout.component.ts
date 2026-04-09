@@ -4,11 +4,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AdminService, AdminSearchItem } from '../../services/admin.service';
+import { AssistFloatingComponent } from '../../components/assist-floating/assist-floating.component';
 
 @Component({
   standalone: true,
   selector: 'app-support-layout',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AssistFloatingComponent],
   templateUrl: './support-layout.component.html',
   styleUrls: ['./support-layout.component.css'],
 })
@@ -16,6 +17,9 @@ export class SupportLayoutComponent implements OnInit {
 
   q = '';
   k = 10;
+  // NEW: source filter + retrieval mode (hooked to /admin/search?type=&hybrid=)
+  type: 'product' | 'order' | 'user' | 'policy' | 'any' = 'any';
+  hybrid = true; // set true if you want RRF fusion for admin search too
   loading = false;
   error = '';
   results: AdminSearchItem[] = []
@@ -24,7 +28,7 @@ export class SupportLayoutComponent implements OnInit {
   constructor(private router: Router, private admin: AdminService) {}
 
   ngOnInit() {
-    this.search(false);
+    // this.search(false);
   }
 
   
@@ -36,7 +40,7 @@ search(requireQuery: boolean = true) {
     }
 
     this.loading = true;
-    this.admin.search(this.q, this.k).subscribe({
+    this.admin.search(this.q, this.k, this.type, this.hybrid).subscribe({
       next: (res) => {
         this.results = res?.items ?? [];
         this.loading = false;

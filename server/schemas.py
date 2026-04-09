@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Literal
 from models import OrderStatus, UserRole
 
 class UserCreate(BaseModel):
@@ -47,7 +47,7 @@ class OrderItemIn(BaseModel):
 
 class OrderCreate(BaseModel):
     items: List[OrderItemIn]
-    payment_method: str = "dummy"
+    payment_method: Literal["stripe", "cod"] = "stripe"
     shipping_address: str
     contact_name: str
     contact_email: EmailStr

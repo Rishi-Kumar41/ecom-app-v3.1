@@ -17,7 +17,7 @@ export interface AdminCreateProductPayload {
 export interface AdminSearchItem {
   score: number;
   snippet: string;
-  source: 'product' | 'policy';
+  source: 'product' | 'order' | 'user' | 'policy';
   product_id?: number | null;
   title?: string | null;
   metadata?: any;
@@ -45,9 +45,20 @@ export class AdminService {
   }
 
   //search admin documents (vector-cosine)
-  search(q?: string, k = 10): Observable<AdminSearchResponse> {
-    let params = new HttpParams().set('k', String(k));
+  /**
+   * Admin universal search over admin_documents (vector; optional hybrid RRF).
+   * @param q query text (optional; if empty, backend returns recent items)
+   * @param k top-k results (default 10)
+   * @param type filter by source: product|order|user|policy|any
+   * @param hybrid fuse vector + BM25 (RRF). Default false for Support UI (toggleable).
+   */
+  search(q: string | null, k = 10, type: string = 'any', hybrid = false): Observable<AdminSearchResponse> {
+    let params = new HttpParams()
+      .set('k', String(k))
+      .set('type', (type || 'any').toLowerCase());
     if (q && q.trim()) params = params.set('q', q.trim());
+    if (hybrid) params = params.set('hybrid', 'true');
+
     return this.http.get<AdminSearchResponse>(`${this.api.base}/admin/search`, { params });
   }
 }
