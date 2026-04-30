@@ -1,4 +1,5 @@
-import { Injectable, inject } from "@angular/core";
+import { Injectable, inject, PLATFORM_ID } from "@angular/core";
+import { isPlatformBrowser } from "@angular/common";
 import {
   HttpClient,
   HttpInterceptorFn,
@@ -31,6 +32,10 @@ export class AuthService {
   private tokenKey = "ecom_token";
   private userKey = "ecom_user";
   private cartKey  = 'ecom_cart';
+
+private platformId = inject(PLATFORM_ID);
+private isBrowser = isPlatformBrowser(this.platformId);
+
   constructor(
     private http: HttpClient,
     private api: ApiService,
@@ -55,10 +60,10 @@ export class AuthService {
     );
   }
   saveToken(token: string) {
-    localStorage.setItem(this.tokenKey, token);
+    if (this.isBrowser) localStorage.setItem(this.tokenKey, token);
   }
   token(): string | null {
-    return localStorage.getItem(this.tokenKey);
+    return this.isBrowser ? localStorage.getItem(this.tokenKey) : null;
   }
   isLoggedIn(): boolean {
     return !!this.token();
@@ -67,42 +72,43 @@ export class AuthService {
 logout(redirectTo: string = '/login') {
   try { this.cart?.clear?.(); } catch {}
 
-  // Clear session/auth data
-  localStorage.removeItem(this.tokenKey);
-  localStorage.removeItem(this.userKey);
-  localStorage.removeItem(this.cartKey);
+  if (this.isBrowser) {
+    // Clear session/auth data
+    localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.userKey);
+    localStorage.removeItem(this.cartKey);
 
-  // Clear Assist chat/session (per-user + generic)
-  try {
-    // Read user (before it's removed, in case userKey was ecom_user)
-    const raw = localStorage.getItem('ecom_user');
-    let uid = '';
-    if (raw) {
-      const u = JSON.parse(raw);
-      uid = String(u?.id ?? u?.email ?? '').trim();
-    }
+    // Clear Assist chat/session (per-user + generic)
+    try {
+      const raw = localStorage.getItem('ecom_user'); // safe now (browser only)
+      let uid = '';
+      if (raw) {
+        const u = JSON.parse(raw);
+        uid = String(u?.id ?? u?.email ?? '').trim();
+      }
 
-    // Generic keys (safe to remove even if unused)
-    localStorage.removeItem('ecom_assist_chat');
-    localStorage.removeItem('ecom_assist_prefs');
+      localStorage.removeItem('ecom_assist_chat');
+      localStorage.removeItem('ecom_assist_prefs');
 
-    // User-scoped keys
-    if (uid) {
-      localStorage.removeItem(`ecom_assist_chat_${uid}`);
-      localStorage.removeItem(`ecom_assist_prefs_${uid}`);
-    }
-  } catch {}
+      if (uid) {
+        localStorage.removeItem(`ecom_assist_chat_${uid}`);
+        localStorage.removeItem(`ecom_assist_prefs_${uid}`);
+      }
+    } catch {}
+  }
 
   this.router.navigate([redirectTo]);
 }
+
 
   fetchMe() {
     return this.http.get<User>(`${this.api.base}/me`);
   }
   setUser(u: User) {
-    localStorage.setItem(this.userKey, JSON.stringify(u));
+    if (this.isBrowser) localStorage.setItem(this.userKey, JSON.stringify(u));
   }
   user(): User | null {
+    if (!this.isBrowser) return null;
     const raw = localStorage.getItem(this.userKey);
     return raw ? JSON.parse(raw) : null;
   }
@@ -136,22 +142,28 @@ logout(redirectTo: string = '/login') {
   }
 
 }
+
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const token = localStorage.getItem("ecom_token");
+  const platformId = inject(PLATFORM_ID);
   const router = inject(Router);
-  if (token)
+
+  // ✅ Server/SSG: do not touch localStorage/window
+  if (!isPlatformBrowser(platformId)) {
+    return next(req);
+  }
+
+  const token = localStorage.getItem("ecom_token");
+  if (token) {
     req = req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
-  
-return next(req).pipe(
+  }
+
+  return next(req).pipe(
     catchError((err) => {
       if (err?.status === 401) {
-        // Clear auth and go to login; remember where the user was
         localStorage.removeItem('ecom_token');
         localStorage.removeItem('ecom_user');
-        const returnUrl =
-          typeof window !== 'undefined'
-            ? window.location.pathname + window.location.search
-            : '/';
+
+        const returnUrl = window.location.pathname + window.location.search;
         router.navigate(['/login'], { queryParams: { returnUrl } });
       }
       return throwError(() => err);

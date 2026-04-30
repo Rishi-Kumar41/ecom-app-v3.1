@@ -4,6 +4,9 @@ server/.venv/
 # Node modules
 client/node_modules/
 
+client/dist/
+client/.DS_Store
+
 # Angular build/cache
 client/.angular/cache/
 
@@ -896,3 +899,5 @@ server/.env
 .venv/lib/python3.9/site-packages/typing_extensions-4.15.0.dist-info/RECORD
 .venv/lib/python3.9/site-packages/typing_extensions-4.15.0.dist-info/WHEEL
 .venv/lib/python3.9/site-packages/typing_extensions-4.15.0.dist-info/licenses/LICENSE
+
+

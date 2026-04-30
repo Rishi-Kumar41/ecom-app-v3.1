@@ -10,7 +10,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/ecom-client",
+            "outputPath": "dist/ecom-client/browser",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": ["zone.js"],
@@ -41,6 +41,62 @@
           "options": {
             "buildTarget": "ecom-client:build"
           }
+        },
+        "server": {
+          "builder": "@angular-devkit/build-angular:server",
+          "options": {
+            "outputPath": "dist/ecom-client/server",
+            "main": "src/server.ts",
+            "tsConfig": "tsconfig.server.json",
+            "sourceMap": true,
+            "inlineStyleLanguage": "css"
+          },
+          "configurations": {
+            "development": {
+              "optimization": false,
+              "sourceMap": true
+            },
+            "production": {
+              "optimization": true,
+              "sourceMap": false
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve-ssr": {
+          "builder": "@angular-devkit/build-angular:ssr-dev-server",
+          "configurations": {
+            "development": {
+              "browserTarget": "ecom-client:build:development",
+              "serverTarget": "ecom-client:server:development"
+            },
+            "production": {
+              "browserTarget": "ecom-client:build:production",
+              "serverTarget": "ecom-client:server:production"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "prerender": {
+          "builder": "@angular-devkit/build-angular:prerender",
+          "options": {
+            "discoverRoutes": false,
+            "routes": [              
+              "/products",
+              "/policies"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "browserTarget": "ecom-client:build:production",
+              "serverTarget": "ecom-client:server:production"
+            },
+            "development": {
+              "browserTarget": "ecom-client:build:development",
+              "serverTarget": "ecom-client:server:development"
+            }
+          },
+          "defaultConfiguration": "production"
         }
       }
     }

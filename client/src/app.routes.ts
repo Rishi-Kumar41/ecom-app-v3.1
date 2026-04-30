@@ -95,7 +95,12 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/profile/profile.component').then(m => m.ProfileComponent),
       },
-
+      {
+        path: 'policies',
+        canActivate: [userGuard],
+        loadComponent: () =>
+          import('./pages/policies/policies.component').then(m => m.PoliciesComponent),
+      }
       // If you added pages like payment success/failure in UI, keep them guarded too:
       // { path: 'payment-success', loadComponent: () => import('./pages/payment/success.component').then(m => m.SuccessComponent) },
       // { path: 'payment-failed',  loadComponent: () => import('./pages/payment/failed.component').then(m => m.FailedComponent) },

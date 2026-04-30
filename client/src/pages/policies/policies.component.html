@@ -1,0 +1,109 @@
+<div class="container">
+  <h1>ECOM-APP Policies (Support + Customer)</h1>
+
+  <h2>Scope</h2>
+  <p>
+    These policies apply to the ECOM-APP web store and customer support
+    operations.
+  </p>
+
+  <hr />
+
+  <h2>1) Ordering & Payment</h2>
+  <h3>Supported payment methods</h3>
+  <ul>
+    <li>Online payment (Stripe) — CURRENT</li>
+    <li>Cash on Delivery (COD) — PLANNED</li>
+  </ul>
+
+  <h3>Order status basics (simplified)</h3>
+  <ul>
+    <li>PENDING_PAYMENT: order created, payment not completed</li>
+    <li>PAID: payment completed successfully</li>
+  </ul>
+
+  <h2>2) Cancellation Policy</h2>
+
+  <h3>CURRENT (what the system enforces today)</h3>
+  <ul>
+    <li>
+      Cancellation is allowed only while the order is in **PENDING_PAYMENT**
+      status.
+    </li>
+    <li>
+      Once payment succeeds (PAID), cancellation is not available through the
+      current UI/API.
+    </li>
+  </ul>
+  <h3>PLANNED (future behavior — to be enabled with tool calling + COD)</h3>
+  <ul>
+    <li>
+      Cancellation may be allowed within **7 days** of order placement for
+      eligible orders.
+    </li>
+    <li>Some items may be non-cancellable after dispatch.</li>
+    <li>Quantity limits and fraud checks may apply.</li>
+  </ul>
+
+  <h2>3) Returns / Refunds Policy (PLANNED)</h2>
+  <p>
+    Returns are not fully implemented in the current system, but the policy is
+    defined for future enablement.
+  </p>
+
+  <h3>Eligibility</h3>
+  <ul>
+    <li>
+      Return request within **7 days** of delivery (recommended policy) OR
+      within **7 days** of order placement (alternate policy).
+    </li>
+    <li>
+      Items must be in reasonable condition; accessories and original packaging
+      preferred.
+    </li>
+    <li>Certain categories may be non-returnable depending on product type.</li>
+  </ul>
+
+  <h3>Quantity limits</h3>
+  <ul>
+    <li>
+      Maximum **2 units per product per order** eligible for return processing
+      via the support flow.
+    </li>
+  </ul>
+  <h3>Refund method</h3>
+  <ul>
+    <li>For prepaid orders: refund to the original payment method (Stripe).</li>
+    <li>
+      For COD orders: refund to a supported method (UPI/bank transfer) —
+      PLANNED.
+    </li>
+  </ul>
+
+  <h2>4) Exchange Policy (PLANNED)</h2>
+  <p>Exchanges are treated as a return + replacement order.</p>
+  <p>Eligibility follows the same conditions as Returns.</p>
+
+  <h2>5) Support (Admin) Workflow Rules — ASM-style (PLANNED)</h2>
+  <p>This is the intended support agent workflow:</p>
+  <ol>
+    <li>Admin logs in to Support.</li>
+    <li>Admin selects the customer to assist.</li>
+    <li>Admin can create/cancel/return orders on behalf of the customer.</li>
+    <li>Admin actions are logged for auditing.</li>
+  </ol>
+
+  <h2>6) Answering Rules for the Assistant (RAG)</h2>
+  <p>When answering questions:</p>
+  <ul>
+    <li>
+      Answer only using the policy content and the product/order information
+      provided in context.
+    </li>
+    <li>
+      If a policy is "PLANNED", clearly state that it is planned and not yet
+      enforced by the system.
+    </li>
+    <li>Do not guess or invent policy rules not present in this document.</li>
+  </ul>
+</div>

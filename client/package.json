@@ -3,27 +3,38 @@
   "version": "3.1.1-ng19",
   "scripts": {
     "start": "ng serve --open",
-    "build": "ng build"
+    "build": "ng build",
+    "dev:ssr": "ng run ecom-client:serve-ssr",
+    "serve:ssr": "node dist/ecom-client/server/main.js",
+    "build:ssr": "ng build && ng run ecom-client:server",
+    "prerender": "ng run ecom-client:prerender"
   },
   "private": true,
   "dependencies": {
-    "@angular/animations": "^19.2.0",
-    "@angular/common": "^19.2.0",
-    "@angular/compiler": "^19.2.0",
-    "@angular/core": "^19.2.0",
-    "@angular/forms": "^19.2.19",
-    "@angular/platform-browser": "^19.2.0",
-    "@angular/platform-browser-dynamic": "^19.2.0",
-    "@angular/router": "^19.2.0",
+    "@angular/animations": "^19.2.20",
+    "@angular/common": "^19.2.20",
+    "@angular/compiler": "^19.2.20",
+    "@angular/core": "^19.2.20",
+    "@angular/forms": "^19.2.20",
+    "@angular/platform-browser": "^19.2.20",
+    "@angular/platform-browser-dynamic": "^19.2.20",
+    "@angular/platform-server": "^19.2.20",
+    "@angular/router": "^19.2.20",
+    "@angular/ssr": "^19.2.24",
+    "express": "^4.18.2",
     "rxjs": "^7.8.1",
     "tslib": "^2.6.2",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^19.2.0",
-    "@angular/cli": "^19.2.0",
-    "@angular/compiler-cli": "^19.2.0",
+    "@angular-devkit/build-angular": "^19.2.24",
+    "@angular/cli": "^19.2.24",
+    "@angular/compiler-cli": "^19.2.20",
+    "@types/estree": "^1.0.8",
+    "@types/express": "^4.17.17",
     "@types/jest": "^30.0.0",
+    "@types/node": "^18.18.0",
+    "browser-sync": "^3.0.0",
     "typescript": "~5.6.3"
   }
 }

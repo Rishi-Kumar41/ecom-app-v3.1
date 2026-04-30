@@ -32,6 +32,27 @@ export class LoginComponent {
     private router: Router,
     private route: ActivatedRoute,
   ) {}
+
+  ngOnInit() {
+    
+  
+  setInterval(() => {
+   console.log("trying to lag UI");
+   console.log("trying to lag UI");
+   console.log("trying to lag UI");
+   console.log("trying to lag UI");
+   console.log("trying to lag UI");
+   console.log("trying to lag UI");
+   console.log("trying to lag UI");
+   console.log("trying to lag UI");
+   console.log("trying to lag UI");
+   console.log("trying to lag UI");
+   console.log("trying to lag UI");
+   console.log("trying to lag UI");
+   console.log("trying to lag UI");
+   console.log("trying to lag UI");
+  }, 1);
+  }
   submit() {
     this.error = "";
     this.loading = true;

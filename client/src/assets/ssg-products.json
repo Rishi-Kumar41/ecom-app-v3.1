@@ -1,0 +1,143 @@
+[
+  {
+    "id": 11,
+    "name": "S25",
+    "description": "Introducing the S25, a cutting-edge device packed with innovative features. \nWith its advanced technology, it offers enhanced performance and efficiency. \nThe S25 boasts a sleek design, making it a stylish addition to any setting. \nIt features a high-resolution display, providing crystal-clear visuals. \nThe device is equipped with long-lasting battery life, ensuring uninterrupted use. \nIt also includes advanced security features, protecting your data and privacy. \nThe S25 is designed for seamless connectivity, making it easy to stay connected. \nExperience the ultimate in convenience and productivity with the S25.",
+    "category": "Phone",
+    "price_cents": 999900,
+    "image_url": null,
+    "stock": 13,
+    "specs": null
+  },
+  {
+    "id": 12,
+    "name": "Galaxy ear buds2",
+    "description": "Introducing the Galaxy ear buds2, a revolutionary audio experience. \nWith a large 6.2 AMOLED display, you can easily control your music and calls.\nPowered by the Snapdragon 8 Gen 3 chip, these earbuds deliver seamless performance.\n128GB of storage allows you to store hundreds of songs and podcasts.\nThe C-Type jack provides easy and convenient charging.\nEnjoy crystal-clear sound and long-lasting battery life.\nExperience the future of audio with the Galaxy ear buds2.\nUpgrade your listening experience with these cutting-edge earbuds.",
+    "category": "Earphones",
+    "price_cents": 12333,
+    "image_url": null,
+    "stock": 24,
+    "specs": {
+      "Display": "6.2 AMOLED",
+      "Chip": "Snapdragon 8 Gen 3",
+      "Storage": "128GB",
+      "jack": "c-Type"
+    }
+  },
+  {
+    "id": 5,
+    "name": "Samsung 27\\\" 4K Monitor",
+    "description": "UHD IPS, HDR10, USB-C",
+    "category": "Monitors",
+    "price_cents": 34990,
+    "image_url": "/assets/products/monitor27.jpg",
+    "stock": 15,
+    "specs": { "Resolution": "3840x2160", "HDR": "HDR10", "USB-C": "65W PD" }
+  },
+  {
+    "id": 6,
+    "name": "Samsung Portable SSD T7 1TB",
+    "description": "USB 3.2 Gen 2, up to 1050 MB/s",
+    "category": "Storage",
+    "price_cents": 8990,
+    "image_url": "/assets/products/t7-1tb.jpg",
+    "stock": 50,
+    "specs": {
+      "Capacity": "1TB",
+      "Speed": "Up to 1050MB/s",
+      "Interface": "USB-C"
+    }
+  },
+  {
+    "id": 7,
+    "name": "Samsung 990 PRO 2TB NVMe",
+    "description": "PCIe 4.0 NVMe SSD",
+    "category": "Storage",
+    "price_cents": 16990,
+    "image_url": "/assets/products/990pro-2tb.jpg",
+    "stock": 30,
+    "specs": {
+      "Capacity": "2TB",
+      "Interface": "PCIe 4.0",
+      "Form Factor": "M.2"
+    }
+  },
+  {
+    "id": 8,
+    "name": "Samsung 65\\\" QLED TV",
+    "description": "4K QLED, Quantum HDR, Smart TV",
+    "category": "TVs",
+    "price_cents": 104990,
+    "image_url": "/assets/products/qled65.jpg",
+    "stock": 8,
+    "specs": { "Size": "65\\\"", "Panel": "QLED", "Smart": "Tizen" }
+  },
+  {
+    "id": 9,
+    "name": "Samsung 15.6\\\" Laptop",
+    "description": "Intel i7, 16GB RAM, 512GB SSD",
+    "category": "Laptops",
+    "price_cents": 72990,
+    "image_url": "/assets/products/laptop15.jpg",
+    "stock": 12,
+    "specs": { "CPU": "Intel i7", "RAM": "16GB", "Storage": "512GB SSD" }
+  },
+  {
+    "id": 10,
+    "name": "Samsung Wireless Charger Duo",
+    "description": "Charge phone + earbuds simultaneously",
+    "category": "Accessories",
+    "price_cents": 3990,
+    "image_url": "/assets/products/chargerduo.jpg",
+    "stock": 70,
+    "specs": { "Output": "15W", "Devices": "Phone + Buds", "Cable": "USB-C" }
+  },
+  {
+    "id": 1,
+    "name": "Samsung Galaxy S24",
+    "description": "6.2\\\" Dynamic AMOLED, Snapdragon 8 Gen 3, 128GB",
+    "category": "Phones",
+    "price_cents": 69900,
+    "image_url": "/assets/products/s24.jpg",
+    "stock": 25,
+    "specs": {
+      "Display": "6.2\\\" AMOLED",
+      "Chip": "Snapdragon 8 Gen 3",
+      "Storage": "128GB"
+    }
+  },
+  {
+    "id": 2,
+    "name": "Samsung Galaxy S24 Ultra",
+    "description": "6.8\\\" QHD+ AMOLED, 200MP camera, 256GB",
+    "category": "Phones",
+    "price_cents": 129900,
+    "image_url": "/assets/products/s24ultra.jpg",
+    "stock": 18,
+    "specs": {
+      "Display": "6.8\\\" QHD+",
+      "Camera": "200MP",
+      "Storage": "256GB"
+    }
+  },
+  {
+    "id": 3,
+    "name": "Samsung Galaxy Buds2 Pro",
+    "description": "ANC earbuds with Hi-Fi sound",
+    "category": "Audio",
+    "price_cents": 14990,
+    "image_url": "/assets/products/buds2pro.jpg",
+    "stock": 60,
+    "specs": { "ANC": "Yes", "Codecs": "SSC HiFi, AAC", "Battery": "18h" }
+  },
+  {
+    "id": 4,
+    "name": "Samsung Galaxy Watch6",
+    "description": "Fitness tracking, AMOLED display, Wear OS",
+    "category": "Wearables",
+    "price_cents": 29990,
+    "image_url": "/assets/products/watch6.jpg",
+    "stock": 40,
+    "specs": { "Size": "44mm", "OS": "Wear OS", "Sensors": "HR, SpO2" }
+  }
+]
